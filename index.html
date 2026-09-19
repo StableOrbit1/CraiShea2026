@@ -326,12 +326,12 @@
             firebaseConfig = JSON.parse(__firebase_config);
         } catch (e) {
             firebaseConfig = {
-                apiKey: "AIzaSyDf_1RE4hscqVVbHoN7Vvqoylj8elWLUn4",
-                authDomain: "battletags-27390.firebaseapp.com",
-                projectId: "battletags-27390",
-                storageBucket: "battletags-27390.firebasestorage.app",
-                messagingSenderId: "930795580018",
-                appId: "1:930795580018:web:b82b95d64572483f85f0eb"
+                apiKey: "AIzaSyD9VZJTpe-Rgz31kiaIzLDX2zutEcx5PgU",
+                authDomain: "havok205-9b090.firebaseapp.com",
+                projectId: "havok205-9b090",
+                storageBucket: "havok205-9b090.firebasestorage.app",
+                messagingSenderId: "89324820118",
+                appId: "1:89324820118:web:9c65b1401146c3d07b14b7"
             };
         }
 
@@ -479,20 +479,29 @@
             // 1. Players
             const qP = collection(db, 'artifacts', DATABASE_FOLDER_NAME, 'public', 'data', 'players');
             onSnapshot(qP, (snapshot) => {
-                rawPlayers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => a.name.localeCompare(b.name));
-                const myProfile = rawPlayers.find(p => p.phone === phoneNumber);
+                try {
+                    rawPlayers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                    const myProfile = rawPlayers.find(p => p.phone === phoneNumber);
 
-                if (myProfile) {
-                    currentUser = myProfile;
-                    updateScoringDropdown();
-                    showScreen('app');
-                    if(document.getElementById('view-wtf').classList.contains('hidden') && document.getElementById('view-groupings').classList.contains('hidden') && document.getElementById('view-scoring').classList.contains('hidden') && document.getElementById('view-leaderboard').classList.contains('hidden') && document.getElementById('view-photowall').classList.contains('hidden')) {
-                        switchView('wtf');
+                    if (myProfile) {
+                        currentUser = myProfile;
+                        updateScoringDropdown();
+                        showScreen('app');
+                        if(document.getElementById('view-wtf').classList.contains('hidden') && document.getElementById('view-groupings').classList.contains('hidden') && document.getElementById('view-scoring').classList.contains('hidden') && document.getElementById('view-leaderboard').classList.contains('hidden') && document.getElementById('view-photowall').classList.contains('hidden')) {
+                            switchView('wtf');
+                        }
+                    } else {
+                        showScreen('register');
                     }
-                } else {
-                    showScreen('register');
+                } catch(err) {
+                    console.error("Player load error:", err);
+                    document.getElementById('screen-loading').innerHTML = `<div class="text-rose-500 font-bold p-6 text-center">Data Error. See Console.</div>`;
                 }
-            }, (error) => console.error(error));
+            }, (error) => {
+                console.error("Firebase Rules Error:", error);
+                document.getElementById('screen-loading').innerHTML = `<div class="text-rose-600 font-black p-8 text-center uppercase tracking-widest bg-rose-50 rounded-3xl m-6 border-2 border-rose-200"><i data-lucide="shield-alert" class="w-10 h-10 mx-auto mb-3"></i>Permission Denied<br><span class="text-xs text-slate-500 font-bold mt-2 block normal-case tracking-normal">Update your Firestore Rules to allow craishea-2026</span></div>`;
+                lucide.createIcons();
+            });
 
             // 2. Scores
             const qS = collection(db, 'artifacts', DATABASE_FOLDER_NAME, 'public', 'data', 'scores');
@@ -503,14 +512,14 @@
                 // If they have a player selected in scoring, refresh the inputs
                 const currentScoringPlayer = document.getElementById('score-player-select').value;
                 if(currentScoringPlayer) loadPlayerScorecard(currentScoringPlayer);
-            });
+            }, (error) => console.error("Scores error:", error));
 
             // 3. Photos
             const qPh = collection(db, 'artifacts', DATABASE_FOLDER_NAME, 'public', 'data', 'photos');
             onSnapshot(qPh, (snapshot) => {
                 rawPhotos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 renderPhotowall();
-            });
+            }, (error) => console.error("Photos error:", error));
         }
 
         // --- APP NAVIGATION LOGIC ---
