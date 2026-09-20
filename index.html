@@ -136,7 +136,8 @@
                     </div>
                     
                     <div class="space-y-6 text-slate-600 font-medium leading-relaxed">
-                        <p class="text-lg">Welcome to <strong>CraiShea 2026</strong>. This app is your central hub for the tournament.</p>
+                        <p class="text-lg leading-relaxed"><strong>CraiShea 2026</strong> is the 3rd Annual Season Ending Birthday Celebration for Craig & Shea . . . not an overly creative name.</p>
+                        <p class="text-slate-500">Entry is <strong>$50</strong>, with all of that going back to the participants, based on their performance.</p>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                             <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100">
@@ -150,13 +151,73 @@
                         </div>
 
                         <div class="bg-sky-50 border border-sky-100 p-6 rounded-3xl mt-4">
-                            <h3 class="text-lg font-black text-sky-800 tracking-tight mb-2 flex items-center gap-2"><i data-lucide="clipboard-list" class="w-5 h-5"></i> Format & Rules</h3>
-                            <ul class="list-disc pl-5 space-y-2 text-sky-700/80">
-                                <li><strong>Stroke Play:</strong> Every shot counts. Enter your gross scores in the Live Scoring tab.</li>
-                                <li><strong>Pace of Play:</strong> Please keep up with the group ahead of you.</li>
-                                <li><strong>Scoring:</strong> Assign one person in your foursome to update the app after every few holes to keep the live leaderboard exciting.</li>
-                                <li><strong>Photos:</strong> Snap pictures of the good, the bad, and the ugly. Upload them to the Photowall!</li>
+                            <h3 class="text-lg font-black text-sky-800 tracking-tight mb-4 flex items-center gap-2"><i data-lucide="clipboard-list" class="w-5 h-5"></i> The Rules</h3>
+                            <ul class="space-y-4 text-sky-800">
+                                <li class="flex gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 shrink-0 text-sky-500"></i> <span><strong>Play your own ball.</strong></span></li>
+                                <li class="flex gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 shrink-0 text-sky-500"></i> <span>Can move out of divots in the fairway and footprints in the traps.</span></li>
+                                <li class="flex gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 shrink-0 text-sky-500"></i> <span><strong>The Breakfast Ball:</strong> Available on hole one, but if you elect to hit a second ball, you're committed to it.</span></li>
+                                <li class="flex gap-3"><i data-lucide="gift" class="w-5 h-5 shrink-0 text-rose-500"></i> <span><strong>NEW: The Birthday Ball.</strong> You can drop and replay <em>one shot</em> in your round, from anywhere except the green. Swings, no putts.</span></li>
                             </ul>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 p-6 md:p-8 rounded-3xl mt-4">
+                            <h3 class="text-lg font-black text-slate-800 tracking-tight mb-6 flex items-center gap-2"><i data-lucide="pie-chart" class="w-5 h-5 text-indigo-500"></i> The $50 Entry Breakdown</h3>
+                            
+                            <div class="flex flex-col md:flex-row items-center gap-8">
+                                <!-- Pure CSS Pie Chart mapping exactly to the percentages -->
+                                <div class="w-48 h-48 rounded-full shadow-lg shrink-0 border-4 border-white" style="background: conic-gradient(#0ea5e9 0% 40%, #6366f1 40% 60%, #10b981 60% 70%, #f59e0b 70% 80%, #f43f5e 80% 90%, #a855f7 90% 100%);"></div>
+                                
+                                <!-- Legend -->
+                                <div class="space-y-3 w-full">
+                                    <div class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm border border-slate-100">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-500 flex items-center justify-center shrink-0"><i data-lucide="trophy" class="w-4 h-4"></i></div>
+                                            <span class="font-bold text-slate-700 text-sm">Winning Net Score</span>
+                                        </div>
+                                        <span class="font-black text-sky-600">$20</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm border border-slate-100">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-500 flex items-center justify-center shrink-0"><i data-lucide="medal" class="w-4 h-4"></i></div>
+                                            <span class="font-bold text-slate-700 text-sm">2nd Place Net Score</span>
+                                        </div>
+                                        <span class="font-black text-indigo-600">$10</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm border border-slate-100">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-500 flex items-center justify-center shrink-0"><i data-lucide="award" class="w-4 h-4"></i></div>
+                                            <span class="font-bold text-slate-700 text-sm">3rd Place Net Score</span>
+                                        </div>
+                                        <span class="font-black text-emerald-600">$5</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm border border-slate-100">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-500 flex items-center justify-center shrink-0"><i data-lucide="target" class="w-4 h-4"></i></div>
+                                            <span class="font-bold text-slate-700 text-sm">Closest to the Pin (8)</span>
+                                        </div>
+                                        <span class="font-black text-amber-600">$5</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm border border-slate-100">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-500 flex items-center justify-center shrink-0"><i data-lucide="crosshair" class="w-4 h-4"></i></div>
+                                            <span class="font-bold text-slate-700 text-sm">Closest to the Pin (17)</span>
+                                        </div>
+                                        <span class="font-black text-rose-600">$5</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm border border-slate-100">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-500 flex items-center justify-center shrink-0"><i data-lucide="check-square" class="w-4 h-4"></i></div>
+                                            <span class="font-bold text-slate-700 text-sm">Most Net Pars or Better</span>
+                                        </div>
+                                        <span class="font-black text-purple-600">$5</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl mt-6 flex items-center gap-3 shadow-sm">
+                            <i data-lucide="alert-circle" class="w-6 h-6 text-amber-500 shrink-0"></i>
+                            <p class="text-sm font-bold text-amber-700">Side games in your group are highly encouraged.</p>
                         </div>
                         
                         <div class="flex justify-center pt-8 border-t border-slate-100">
@@ -428,7 +489,9 @@
                 window.confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
                 showScreen('otp');
             } catch(err) {
-                console.error(err); showToast("Error sending code.", true);
+                console.error(err); 
+                // Show the actual Firebase error message in the toast to make debugging easier
+                showToast(err.message || "Error sending code.", true);
                 btn.innerHTML = 'Send Code'; btn.disabled = false;
             }
         }
