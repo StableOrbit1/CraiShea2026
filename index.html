@@ -702,11 +702,13 @@
             }
 
             const strokeIndex = {1:9, 2:15, 3:3, 4:17, 5:11, 6:5, 7:1, 8:13, 9:7, 10:14, 11:4, 12:2, 13:18, 14:2, 15:6, 16:10, 17:16, 18:8};
+            const holePars = {1:4, 2:3, 3:4, 4:4, 5:4, 6:5, 7:5, 8:3, 9:4, 10:4, 11:5, 12:3, 13:4, 14:5, 15:4, 16:4, 17:3, 18:4};
 
             const lbData = rawPlayers.map(p => {
                 const s = rawScores.find(scoreDoc => scoreDoc.id === p.id);
                 let totalGross = 0;
                 let totalNet = 0;
+                let totalParPlayed = 0;
                 let thru = 0;
                 
                 if (s && s.holes) {
@@ -718,6 +720,7 @@
                         if(s.holes[i]) {
                             totalGross += s.holes[i];
                             thru++;
+                            totalParPlayed += holePars[i];
                             
                             let netScore = s.holes[i];
                             let si = strokeIndex[i];
@@ -738,24 +741,29 @@
                     }
                 }
 
+                let netToPar = totalNet - totalParPlayed;
+                let displayNetToPar = netToPar > 0 ? '+' + netToPar : (netToPar === 0 ? 'E' : netToPar);
+
                 return {
                     name: p.name,
                     handicap: p.handicap || '0',
                     totalGross: totalGross,
                     totalNet: totalNet,
+                    netToPar: netToPar,
+                    displayNetToPar: displayNetToPar,
                     thru: thru,
                     hasPlayed: thru > 0
                 };
             });
 
-            // Sort by Net score first, since it is a Net event
+            // Sort by Net to Par score first, so in-progress comparisons are fair
             lbData.sort((a, b) => {
                 if (a.hasPlayed && !b.hasPlayed) return -1;
                 if (!a.hasPlayed && b.hasPlayed) return 1;
                 if (!a.hasPlayed && !b.hasPlayed) return a.name.localeCompare(b.name);
                 
-                if (a.totalNet === b.totalNet) return b.thru - a.thru; 
-                return a.totalNet - b.totalNet;
+                if (a.netToPar === b.netToPar) return b.thru - a.thru; 
+                return a.netToPar - b.netToPar;
             });
 
             listEl.innerHTML = lbData.map((p, i) => {
@@ -763,8 +771,12 @@
                 const posBadge = isLeader ? '<i data-lucide="crown" class="w-4 h-4 text-white"></i>' : (p.hasPlayed ? i + 1 : '-');
                 const badgeClass = isLeader ? 'bg-amber-400 text-white shadow-md' : 'bg-slate-100 text-slate-400';
                 
+                let scoreColor = 'text-slate-800'; // Over Par
+                if (p.netToPar < 0) scoreColor = 'text-rose-600'; // Under Par
+                else if (p.netToPar === 0) scoreColor = 'text-emerald-600'; // Even Par
+                
                 return `
-                <div class="grid grid-cols-12 gap-2 items-center p-3 md:p-4 hover:bg-slate-50 transition-colors">
+                <div class="grid grid-cols-12 gap-2 items-center p-3 md:p-4 hover:bg-slate-50 transition-colors border-b border-slate-50">
                     <div class="col-span-2 md:col-span-1 flex justify-center">
                         <span class="w-6 h-6 md:w-8 md:h-8 rounded-lg flex items-center justify-center font-black text-[10px] md:text-xs shrink-0 ${badgeClass}">${posBadge}</span>
                     </div>
@@ -774,7 +786,7 @@
                     </div>
                     <div class="col-span-2 text-center font-bold text-slate-500 text-xs md:text-base">${p.thru === 18 ? 'F' : p.thru}</div>
                     <div class="col-span-2 text-center font-black text-slate-400 text-sm md:text-lg">${p.hasPlayed ? p.totalGross : '-'}</div>
-                    <div class="col-span-2 text-center font-black ${p.hasPlayed ? 'text-sky-600' : 'text-slate-300'} text-sm md:text-lg">${p.hasPlayed ? p.totalNet : '-'}</div>
+                    <div class="col-span-2 text-center font-black ${p.hasPlayed ? scoreColor : 'text-slate-300'} text-sm md:text-lg">${p.hasPlayed ? p.displayNetToPar : '-'}</div>
                 </div>
             `}).join('');
 
