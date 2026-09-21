@@ -88,7 +88,11 @@
                 </div>
                 <div>
                     <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1">Verified Handicap</label>
-                    <input type="text" id="reg-hdcp" required placeholder="e.g. 10.5 or +2" class="w-full p-4 bg-slate-50 border-2 border-slate-100 focus:border-sky-500 rounded-2xl font-bold text-slate-800 outline-none">
+                    <input type="text" id="reg-hdcp" placeholder="e.g. 10.5 or +2" class="w-full p-4 bg-slate-50 border-2 border-slate-100 focus:border-sky-500 rounded-2xl font-bold text-slate-800 outline-none">
+                </div>
+                <div class="flex items-center gap-2 mt-2 ml-1">
+                    <input type="checkbox" id="reg-nohdcp" onchange="toggleNoHandicap(this.checked)" class="w-4 h-4 accent-sky-500 rounded cursor-pointer">
+                    <label for="reg-nohdcp" class="text-[10px] font-black text-slate-500 uppercase tracking-widest cursor-pointer">I do not have a handicap (Ineligible for Net Prizes)</label>
                 </div>
                 <div class="bg-rose-50 border border-rose-100 p-4 rounded-xl text-rose-800 text-xs font-medium leading-relaxed mt-2">
                     <span class="font-bold uppercase tracking-wider block mb-1"><i data-lucide="alert-triangle" class="w-4 h-4 inline pb-0.5"></i> Warning</span>
@@ -96,6 +100,19 @@
                 </div>
                 <button type="submit" id="register-btn" class="w-full bg-sky-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-sky-700 shadow-xl transition-all active-scale mt-4">Join Tournament</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Admin Screen -->
+    <div id="screen-admin" class="fixed inset-0 z-[300] bg-slate-900 overflow-y-auto hidden">
+        <div class="max-w-md mx-auto bg-white min-h-screen p-6">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight">Admin Dashboard</h2>
+                <button onclick="document.getElementById('screen-admin').classList.add('hidden')" class="bg-slate-100 p-2 rounded-full text-slate-500 hover:text-rose-500"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="space-y-4" id="admin-players-list">
+                <!-- JS Populated -->
+            </div>
         </div>
     </div>
 
@@ -140,7 +157,8 @@
                             <i data-lucide="info" class="w-7 h-7"></i>
                         </div>
                         <div>
-                            <h2 class="text-3xl font-black text-slate-800 tracking-tight">The Details</h2>
+                            <!-- DOUBLE CLICK THIS TITLE FOR ADMIN -->
+                            <h2 ondblclick="openAdmin()" class="text-3xl font-black text-slate-800 tracking-tight cursor-pointer select-none">The Details</h2>
                             <p class="text-[10px] font-black text-sky-600 uppercase tracking-widest mt-1">Saturday Oct 17 @ 11:00 AM</p>
                         </div>
                     </div>
@@ -208,12 +226,15 @@
                         <h2 class="text-3xl font-black text-slate-800 tracking-tight">Digital Scorecard</h2>
                         <p class="text-[10px] font-black text-sky-600 uppercase tracking-widest mt-1">Input Gross Scores Only</p>
                     </div>
-                    <div id="scoring-as-badge" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 shadow-sm flex items-center gap-2">
-                        <i data-lucide="user" class="w-4 h-4"></i> Scoring as: <span id="scoring-as-name" class="text-sky-600">Loading...</span>
-                    </div>
                 </div>
 
                 <div class="bg-white rounded-[3rem] shadow-xl border border-slate-200 p-6 md:p-8">
+                    
+                    <!-- Group Scoring Sub Nav -->
+                    <div id="scoring-sub-nav" class="flex gap-2 overflow-x-auto custom-scrollbar pb-2 mb-6 border-b border-slate-100">
+                        <!-- JS populated -->
+                    </div>
+
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-lg font-black text-slate-800 tracking-tight uppercase">Front 9</h3>
                     </div>
@@ -283,7 +304,7 @@
     </div>
 
     <!-- Toast Container -->
-    <div id="toast-container" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[1000] flex flex-col gap-2 pointer-events-none"></div>
+    <div id="toast-container" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[1000] flex flex-col gap-2 pointer-events-none w-[90%] max-w-sm"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -291,7 +312,7 @@
         import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-        // Firebase Config (havok205-9b090)
+        // NEW CraiShea Database Project
         const firebaseConfig = {
             apiKey: "AIzaSyD9VZJTpe-Rgz31kiaIzLDX2zutEcx5PgU",
             authDomain: "havok205-9b090.firebaseapp.com",
@@ -301,7 +322,7 @@
             appId: "1:89324820118:web:9c65b1401146c3d07b14b7"
         };
         
-        const activeAppId = 'craishea-2026'; // New isolated database folder
+        const activeAppId = 'craishea-2026';
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -326,8 +347,8 @@
             { time: "11:10", players: ["Jacob Scriven", "Dave Ashwood", "Justin Cogan", "Rob Nichols"] },
             { time: "11:20", players: ["Scott Watson", "Craig Flannagan", "Tyler Risdon", "Charlie McKinlay"] },
             { time: "11:30", players: ["Mike Flannagan", "Colin Moore", "Dave Spylo", "Bailey Farrell"] },
-            { time: "11:40", players: ["Luke Coles", "Jordan Horowitz", "Brandon Benn", "Sean McBurney"] },
-            { time: "11:50", players: ["Dave McCharles", "Jesse Rabishaw", "Shea Burton", "Nick Coulson"] },
+            { time: "11:40", players: ["Luke Coles", "Jordan Horowitz", "Dave McCharles", "Sean McBurney"] },
+            { time: "11:50", players: ["Brandon Benn", "Jesse Rabishaw", "Shea Burton", "Nick Coulson"] },
             { time: "12:00", players: ["Shane Quinnlan", "Jeff Ash", "Keith Palmer", "Corey Pellerin"] }
         ];
 
@@ -335,10 +356,10 @@
         window.showToast = function(msg, isError = false) {
             const container = document.getElementById('toast-container');
             const t = document.createElement('div');
-            t.className = `px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-white shadow-2xl transition-all duration-300 ${isError ? 'bg-rose-600' : 'bg-slate-900'}`;
+            t.className = `px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-white shadow-2xl transition-all duration-300 w-full ${isError ? 'bg-rose-600' : 'bg-slate-900'}`;
             t.innerHTML = msg; 
             container.appendChild(t);
-            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 5000);
         }
 
         window.showScreen = function(screenName) {
@@ -448,12 +469,23 @@
             btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin inline"></i> Sending...'; btn.disabled = true; lucide.createIcons();
 
             try {
-                if (!window.recaptchaVerifier) window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
+                // Safely instantiate Captcha, or reset it if it got stuck
+                if (!window.recaptchaVerifier) {
+                    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 
+                        'size': 'invisible',
+                        'callback': (response) => { console.log("Captcha solved."); },
+                        'expired-callback': () => { window.recaptchaVerifier.reset(); }
+                    });
+                }
                 window.confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
                 showScreen('otp');
             } catch(err) {
                 console.error(err);
-                showToast(`Auth Failed: ${err.code}`, true);
+                if (window.recaptchaVerifier) {
+                    window.recaptchaVerifier.clear();
+                    window.recaptchaVerifier = null;
+                }
+                showToast(`Auth Error: ${err.message}`, true);
                 btn.innerHTML = 'Send Code'; btn.disabled = false;
             }
         }
@@ -486,7 +518,7 @@
             const hdcp = document.getElementById('reg-hdcp').value.trim();
             const noHdcp = document.getElementById('reg-nohdcp').checked;
             
-            if (!name || !hdcp) return showToast("All fields required", true);
+            if (!name || (!hdcp && !noHdcp)) return showToast("All fields required", true);
 
             const btn = document.getElementById('register-btn');
             btn.disabled = true; btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin inline"></i> Joining...`; lucide.createIcons();
@@ -518,7 +550,7 @@
                 allPlayers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 const myProfile = allPlayers.find(p => p.id === phoneNumber);
 
-                buildGroupings(); // Rebuild groupings live to show Paid checkmarks instantly
+                buildGroupings();
 
                 if (myProfile) {
                     currentUserData = myProfile;
@@ -540,7 +572,7 @@
                     showScreen('register');
                 }
             }, (error) => {
-                showToast(`DB Error: ${error.code}`, true);
+                showToast(`DB Error: ${error.message}. Please check Firebase Rules.`, true);
             });
 
             const qPhotos = collection(db, 'artifacts', activeAppId, 'public', 'data', 'photos');
@@ -588,13 +620,11 @@
             if(!playerId) return;
             const targetPlayer = allPlayers.find(p => p.id === playerId);
             
-            // Clear all inputs first
             for(let i=1; i<=18; i++) {
                 const el = document.getElementById(`score-h${i}`);
                 if (el) el.value = '';
             }
 
-            // Populate if they have scores
             if(targetPlayer && targetPlayer.scores) {
                 for(let i=1; i<=18; i++) {
                     const el = document.getElementById(`score-h${i}`);
@@ -615,14 +645,13 @@
             }
 
             try {
-                // Update the specifically selected group member's database document
                 await setDoc(doc(db, 'artifacts', activeAppId, 'public', 'data', 'players', activeScoringPlayerId), {
                     scores: scores,
                     lastUpdated: new Date().toISOString()
                 }, { merge: true });
                 showToast("Scorecard saved!");
             } catch(err) {
-                showToast(`Save Error: ${err.code}`, true);
+                showToast(`Save Error: ${err.message}`, true);
             } finally {
                 btn.innerHTML = `<i data-lucide="save" class="w-5 h-5"></i> Save Scorecard`; btn.disabled = false; lucide.createIcons();
             }
@@ -630,12 +659,9 @@
 
         // Leaderboard Math
         function parseHandicap(hStr) {
-            if(!hStr) return 0;
+            if(!hStr || hStr === 'NC') return 0;
             hStr = String(hStr).trim();
-            if(hStr.startsWith('+')) {
-                // e.g. "+2" means they GIVE strokes, so course handicap is -2
-                return -Math.abs(parseFloat(hStr.replace('+', '')));
-            }
+            if(hStr.startsWith('+')) return -Math.abs(parseFloat(hStr.replace('+', '')));
             return parseFloat(hStr);
         }
 
@@ -657,7 +683,6 @@
                         holesPlayed++;
                         currentGross += parseInt(gross);
 
-                        // Only calculate net values if they actually have a handicap
                         if (!isNC) {
                             let strokesForHole = 0;
                             if (courseHdcp > 0) {
@@ -681,12 +706,12 @@
                     thru: holesPlayed === 18 ? 'F' : holesPlayed,
                     gross: holesPlayed > 0 ? currentGross : '-',
                     netParsOrBetterDisplay: isNC ? 'N/A' : (holesPlayed > 0 ? netParsOrBetter : '-'),
-                    netToPar: isNC ? 9999 : (holesPlayed > 0 ? currentNetToPar : 999), // Push unstarted and NC players to bottom
+                    netToPar: isNC ? 9999 : (holesPlayed > 0 ? currentNetToPar : 999), 
                     netToParDisplay: isNC ? 'N/A' : (holesPlayed === 0 ? '-' : (currentNetToPar === 0 ? 'E' : (currentNetToPar > 0 ? `+${currentNetToPar}` : currentNetToPar)))
                 };
             });
 
-            // Sort by Net To Par ascending
+            // Sort by Net To Par
             lbData.sort((a, b) => a.netToPar - b.netToPar || a.name.localeCompare(b.name));
 
             listEl.innerHTML = lbData.map((p, i) => {
@@ -718,16 +743,13 @@
             btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Uploading...`; btn.style.pointerEvents = 'none'; lucide.createIcons();
 
             try {
-                // Compress
                 const compressedBlob = await compressImage(file, 1200, 1200, 0.7);
                 const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
                 
-                // Upload to Storage
                 const storageRef = ref(storage, `artifacts/${activeAppId}/public/data/photos/${Date.now()}_${safeName}`);
                 await uploadBytes(storageRef, compressedBlob);
                 const url = await getDownloadURL(storageRef);
 
-                // Add to Firestore using strict secure path and addDoc
                 await addDoc(collection(db, 'artifacts', activeAppId, 'public', 'data', 'photos'), {
                     url: url,
                     uploadedBy: currentUserData ? currentUserData.name : 'Unknown',
@@ -737,10 +759,10 @@
                 showToast("Photo uploaded successfully!");
             } catch(err) {
                 console.error(err);
-                showToast(`Upload failed: ${err.code}`, true);
+                showToast(`Upload failed: ${err.message}`, true);
             } finally {
                 btn.innerHTML = originalContent; btn.style.pointerEvents = 'auto'; lucide.createIcons();
-                e.target.value = ''; // Reset input
+                e.target.value = ''; 
             }
         }
 
@@ -761,7 +783,6 @@
             `).join('');
         }
 
-        // Image Compression Helper
         const compressImage = async (file, maxWidth = 1200, maxHeight = 1200, quality = 0.7) => {
             return new Promise((resolve, reject) => {
                 const img = new Image(); img.src = URL.createObjectURL(file);
@@ -778,21 +799,10 @@
             });
         };
 
-        // Boot
         lucide.createIcons();
         buildGroupings();
         buildScoreInputs();
         
-        // Timeout loader fallback
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const loader = document.getElementById('screen-loading');
-                if (loader && !loader.classList.contains('hidden')) {
-                    // Only hide if we haven't already transitioned to another screen
-                }
-            }, 3000); 
-        });
-
     </script>
 </body>
 </html>
