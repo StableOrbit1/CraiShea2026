@@ -314,6 +314,8 @@
         let currentUserData = null;
         let allPlayers = [];
         let allPhotos = [];
+        let activeScoringPlayerId = null;
+        let myGroupNames = [];
 
         // Corrected Golf Data
         const holePars = {1:4, 2:3, 3:4, 4:4, 5:4, 6:5, 7:5, 8:3, 9:4, 10:4, 11:5, 12:3, 13:4, 14:5, 15:4, 16:4, 17:3, 18:4};
@@ -360,17 +362,55 @@
             });
         };
 
+        // Admin Functions
+        window.openAdmin = function() {
+            document.getElementById('screen-admin').classList.remove('hidden');
+            const list = document.getElementById('admin-players-list');
+            
+            const sorted = [...allPlayers].sort((a,b) => a.name.localeCompare(b.name));
+            list.innerHTML = sorted.map(p => `
+                <div class="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+                    <span class="font-bold text-sm text-slate-800 uppercase tracking-tight">${p.name}</span>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Paid</span>
+                        <input type="checkbox" onchange="togglePaid('${p.id}', this.checked)" ${p.hasPaid ? 'checked' : ''} class="w-6 h-6 accent-emerald-500 rounded cursor-pointer">
+                    </label>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        window.togglePaid = async function(id, status) {
+            try {
+                await setDoc(doc(db, 'artifacts', activeAppId, 'public', 'data', 'players', id), { hasPaid: status }, { merge: true });
+                showToast("Payment status updated!");
+            } catch(e) { showToast("Error updating database", true); }
+        }
+
         // UI Generators
         function buildGroupings() {
             const container = document.getElementById('groupings-container');
             container.innerHTML = groupings.map(g => `
                 <div class="bg-slate-50 border border-slate-100 rounded-3xl p-6 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 bg-sky-500 text-white font-black text-lg px-4 py-2 rounded-bl-2xl">${g.time}</div>
-                    <div class="pt-6 space-y-2">
-                        ${g.players.map((p, i) => `<div class="flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-400 shrink-0">${i+1}</span><span class="font-black text-slate-700 uppercase tracking-tight text-sm">${p}</span></div>`).join('')}
+                    <div class="absolute top-0 right-0 bg-sky-500 text-white font-black text-lg px-4 py-2 rounded-bl-2xl shadow-sm">${g.time}</div>
+                    <div class="pt-6 space-y-3">
+                        ${g.players.map((p, i) => {
+                            const playerDoc = allPlayers.find(ap => ap.name.toLowerCase() === p.toLowerCase());
+                            const hdcpDisplay = playerDoc ? (playerDoc.noHandicap ? 'NC' : playerDoc.handicap) : 'TBD';
+                            const paidBadge = (playerDoc && playerDoc.hasPaid) ? `<i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 shrink-0" title="Paid"></i>` : '';
+                            
+                            return `<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100/50 pb-2 last:border-0 last:pb-0">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-400 shrink-0">${i+1}</span>
+                                    <span class="font-black text-slate-700 uppercase tracking-tight text-sm flex items-center gap-2">${p} ${paidBadge}</span>
+                                </div>
+                                <span class="text-[9px] font-black ${playerDoc && playerDoc.noHandicap ? 'text-rose-500 bg-rose-50 border-rose-100' : 'text-slate-500 bg-white border-slate-200'} uppercase tracking-widest px-3 py-1.5 rounded-lg border shadow-sm sm:ml-auto w-max flex items-center gap-1">HDCP: <span class="text-sm">${hdcpDisplay}</span></span>
+                            </div>`;
+                        }).join('')}
                     </div>
                 </div>
             `).join('');
+            lucide.createIcons();
         }
 
         function buildScoreInputs() {
@@ -431,10 +471,20 @@
             }
         }
 
+        window.toggleNoHandicap = function(checked) {
+            const hdcpInput = document.getElementById('reg-hdcp');
+            if (checked) {
+                hdcpInput.value = 'NC'; hdcpInput.disabled = true; hdcpInput.classList.add('opacity-50');
+            } else {
+                hdcpInput.value = ''; hdcpInput.disabled = false; hdcpInput.classList.remove('opacity-50');
+            }
+        }
+
         window.registerUser = async function(e) {
             e.preventDefault();
             const name = document.getElementById('reg-name').value.trim();
             const hdcp = document.getElementById('reg-hdcp').value.trim();
+            const noHdcp = document.getElementById('reg-nohdcp').checked;
             
             if (!name || !hdcp) return showToast("All fields required", true);
 
@@ -446,7 +496,9 @@
                 await setDoc(doc(db, 'artifacts', activeAppId, 'public', 'data', 'players', docId), {
                     phone: docId,
                     name: name,
-                    handicap: hdcp,
+                    handicap: noHdcp ? 'NC' : hdcp,
+                    noHandicap: noHdcp,
+                    hasPaid: false,
                     timestamp: new Date().toISOString()
                 });
                 showToast("Registration successful!");
@@ -466,10 +518,22 @@
                 allPlayers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 const myProfile = allPlayers.find(p => p.id === phoneNumber);
 
+                buildGroupings(); // Rebuild groupings live to show Paid checkmarks instantly
+
                 if (myProfile) {
                     currentUserData = myProfile;
-                    document.getElementById('scoring-as-name').innerText = currentUserData.name;
-                    loadMyScoresToUI();
+                    
+                    // Identify Tee Group for Group Scoring
+                    for (let g of groupings) {
+                        if (g.players.some(p => p.toLowerCase() === currentUserData.name.toLowerCase())) {
+                            myGroupNames = g.players; break;
+                        }
+                    }
+
+                    if(!activeScoringPlayerId) activeScoringPlayerId = currentUserData.id;
+                    renderScoringSubNav();
+                    loadScoresForPlayer(activeScoringPlayerId);
+                    
                     renderLeaderboard();
                     showScreen('app');
                 } else {
@@ -486,18 +550,61 @@
             });
         }
 
-        function loadMyScoresToUI() {
-            if(!currentUserData || !currentUserData.scores) return;
+        window.renderScoringSubNav = function() {
+            const subNav = document.getElementById('scoring-sub-nav');
+            if (myGroupNames.length === 0) {
+                subNav.innerHTML = `<div class="text-[10px] text-rose-500 font-bold uppercase tracking-widest p-4 border border-rose-200 bg-rose-50 rounded-xl w-full text-center">Your name is not in the tee sheet. Contact Craig or Shea.</div>`;
+                return;
+            }
+
+            subNav.innerHTML = myGroupNames.map(pName => {
+                const playerDoc = allPlayers.find(ap => ap.name.toLowerCase() === pName.toLowerCase());
+                const id = playerDoc ? playerDoc.id : null;
+                
+                if (!id) {
+                    return `<button disabled class="flex-1 min-w-[80px] py-3 px-2 rounded-2xl font-black text-[9px] uppercase transition-all bg-slate-50 text-slate-300 border-2 border-slate-100 flex flex-col items-center justify-center cursor-not-allowed">
+                        <span class="truncate w-full text-center">${pName}</span>
+                        <span class="text-[7px] text-rose-400 mt-0.5 tracking-widest">Unregistered</span>
+                    </button>`;
+                }
+
+                const isActive = activeScoringPlayerId === id;
+                const colorClass = isActive ? 'bg-sky-500 text-white shadow-lg border-2 border-sky-600' : 'bg-white text-slate-500 hover:bg-slate-50 border-2 border-slate-200';
+                
+                return `<button onclick="switchScoringPlayer('${id}')" class="flex-1 min-w-[80px] py-3 px-2 rounded-2xl font-black text-[9px] uppercase transition-all ${colorClass} flex flex-col items-center justify-center active-scale">
+                    <span class="truncate w-full text-center">${pName}</span>
+                    <span class="text-[7px] mt-0.5 tracking-widest ${isActive ? 'text-sky-200' : 'text-slate-400'}">Enter Scores</span>
+                </button>`;
+            }).join('');
+        }
+
+        window.switchScoringPlayer = function(playerId) {
+            activeScoringPlayerId = playerId;
+            renderScoringSubNav();
+            loadScoresForPlayer(playerId);
+        }
+
+        function loadScoresForPlayer(playerId) {
+            if(!playerId) return;
+            const targetPlayer = allPlayers.find(p => p.id === playerId);
+            
+            // Clear all inputs first
             for(let i=1; i<=18; i++) {
                 const el = document.getElementById(`score-h${i}`);
-                if (el && currentUserData.scores[i]) {
-                    el.value = currentUserData.scores[i];
+                if (el) el.value = '';
+            }
+
+            // Populate if they have scores
+            if(targetPlayer && targetPlayer.scores) {
+                for(let i=1; i<=18; i++) {
+                    const el = document.getElementById(`score-h${i}`);
+                    if (el && targetPlayer.scores[i]) el.value = targetPlayer.scores[i];
                 }
             }
         }
 
         window.saveScores = async function() {
-            if (!currentUserData) return;
+            if (!activeScoringPlayerId) return;
             const btn = document.getElementById('save-scores-btn');
             btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Saving...`; btn.disabled = true; lucide.createIcons();
 
@@ -508,7 +615,8 @@
             }
 
             try {
-                await setDoc(doc(db, 'artifacts', activeAppId, 'public', 'data', 'players', currentUserData.id), {
+                // Update the specifically selected group member's database document
+                await setDoc(doc(db, 'artifacts', activeAppId, 'public', 'data', 'players', activeScoringPlayerId), {
                     scores: scores,
                     lastUpdated: new Date().toISOString()
                 }, { merge: true });
@@ -536,7 +644,8 @@
             if (allPlayers.length === 0) return listEl.innerHTML = '<div class="p-16 text-center text-slate-400 font-bold uppercase tracking-widest animate-pulse">Waiting for players...</div>';
 
             const lbData = allPlayers.map(p => {
-                let courseHdcp = Math.round(parseHandicap(p.handicap));
+                const isNC = p.noHandicap === true;
+                let courseHdcp = isNC ? 0 : Math.round(parseHandicap(p.handicap));
                 let currentNetToPar = 0;
                 let currentGross = 0;
                 let holesPlayed = 0;
@@ -548,55 +657,55 @@
                         holesPlayed++;
                         currentGross += parseInt(gross);
 
-                        // Stroke allocation logic
-                        let strokesForHole = 0;
-                        if (courseHdcp > 0) {
-                            strokesForHole = Math.floor(courseHdcp / 18) + (strokeIndex[i] <= (courseHdcp % 18) ? 1 : 0);
-                        } else if (courseHdcp < 0) {
-                            let plusCh = Math.abs(courseHdcp);
-                            // Plus handicaps ADD strokes to their score on the easiest holes (18, 17, etc)
-                            strokesForHole = -(Math.floor(plusCh / 18) + ((19 - strokeIndex[i]) <= (plusCh % 18) ? 1 : 0));
-                        }
+                        // Only calculate net values if they actually have a handicap
+                        if (!isNC) {
+                            let strokesForHole = 0;
+                            if (courseHdcp > 0) {
+                                strokesForHole = Math.floor(courseHdcp / 18) + (strokeIndex[i] <= (courseHdcp % 18) ? 1 : 0);
+                            } else if (courseHdcp < 0) {
+                                let plusCh = Math.abs(courseHdcp);
+                                strokesForHole = -(Math.floor(plusCh / 18) + ((19 - strokeIndex[i]) <= (plusCh % 18) ? 1 : 0));
+                            }
 
-                        let netScore = parseInt(gross) - strokesForHole;
-                        currentNetToPar += (netScore - holePars[i]);
-                        
-                        // Check if Net Score is a Par or better
-                        if (netScore <= holePars[i]) {
-                            netParsOrBetter++;
+                            let netScore = parseInt(gross) - strokesForHole;
+                            currentNetToPar += (netScore - holePars[i]);
+                            
+                            if (netScore <= holePars[i]) netParsOrBetter++;
                         }
                     }
                 }
 
                 return {
                     name: p.name,
-                    hdcpDisplay: p.handicap,
+                    hdcpDisplay: isNC ? 'NC' : p.handicap,
                     thru: holesPlayed === 18 ? 'F' : holesPlayed,
                     gross: holesPlayed > 0 ? currentGross : '-',
-                    netParsOrBetterDisplay: holesPlayed > 0 ? netParsOrBetter : '-',
-                    netToPar: holesPlayed > 0 ? currentNetToPar : 999, // 999 sorts to bottom if no score
-                    netToParDisplay: holesPlayed === 0 ? '-' : (currentNetToPar === 0 ? 'E' : (currentNetToPar > 0 ? `+${currentNetToPar}` : currentNetToPar))
+                    netParsOrBetterDisplay: isNC ? 'N/A' : (holesPlayed > 0 ? netParsOrBetter : '-'),
+                    netToPar: isNC ? 9999 : (holesPlayed > 0 ? currentNetToPar : 999), // Push unstarted and NC players to bottom
+                    netToParDisplay: isNC ? 'N/A' : (holesPlayed === 0 ? '-' : (currentNetToPar === 0 ? 'E' : (currentNetToPar > 0 ? `+${currentNetToPar}` : currentNetToPar)))
                 };
             });
 
             // Sort by Net To Par ascending
             lbData.sort((a, b) => a.netToPar - b.netToPar || a.name.localeCompare(b.name));
 
-            listEl.innerHTML = lbData.map((p, i) => `
-                <div class="grid grid-cols-12 gap-1 md:gap-2 items-center p-3 md:p-5 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
+            listEl.innerHTML = lbData.map((p, i) => {
+                const isNCAesthetics = p.netToParDisplay === 'N/A';
+                return `
+                <div class="grid grid-cols-12 gap-1 md:gap-2 items-center p-3 md:p-5 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0 ${isNCAesthetics ? 'opacity-60 grayscale' : ''}">
                     <div class="col-span-4 flex items-center gap-2 md:gap-3 overflow-hidden">
-                        <span class="w-5 h-5 rounded flex items-center justify-center font-black text-[9px] shrink-0 bg-slate-100 text-slate-400">${i + 1}</span>
+                        <span class="w-5 h-5 rounded flex items-center justify-center font-black text-[9px] shrink-0 bg-slate-100 text-slate-400">${isNCAesthetics ? '-' : i + 1}</span>
                         <div class="flex flex-col truncate">
                             <span class="font-bold text-slate-800 uppercase tracking-tight text-[10px] md:text-sm truncate">${p.name}</span>
-                            <span class="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">HDCP: ${p.hdcpDisplay}</span>
+                            <span class="text-[8px] md:text-[9px] font-black ${isNCAesthetics ? 'text-rose-400' : 'text-slate-400'} uppercase tracking-widest">HDCP: ${p.hdcpDisplay}</span>
                         </div>
                     </div>
                     <div class="col-span-2 text-center font-bold text-slate-500 text-xs md:text-sm">${p.thru}</div>
                     <div class="col-span-2 text-center font-black text-slate-700 text-xs md:text-sm">${p.gross}</div>
-                    <div class="col-span-2 text-center font-black text-emerald-600 text-xs md:text-sm">${p.netParsOrBetterDisplay}</div>
-                    <div class="col-span-2 text-center font-black text-base md:text-lg ${p.netToPar < 0 ? 'text-rose-600' : (p.netToPar === 0 ? 'text-emerald-600' : 'text-slate-700')}">${p.netToParDisplay}</div>
+                    <div class="col-span-2 text-center font-black ${isNCAesthetics ? 'text-slate-400' : 'text-emerald-600'} text-xs md:text-sm">${p.netParsOrBetterDisplay}</div>
+                    <div class="col-span-2 text-center font-black text-base md:text-lg ${isNCAesthetics ? 'text-slate-400' : (p.netToPar < 0 ? 'text-rose-600' : (p.netToPar === 0 ? 'text-emerald-600' : 'text-slate-700'))}">${p.netToParDisplay}</div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         // Photowall Logic
