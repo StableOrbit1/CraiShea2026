@@ -201,10 +201,9 @@
                                 <div class="w-48 h-48 rounded-full shadow-lg shrink-0 relative" style="background: conic-gradient(
                                     #0ea5e9 0% 40%, 
                                     #38bdf8 40% 60%, 
-                                    #7dd3fc 60% 70%, 
-                                    #fcd34d 70% 80%, 
-                                    #fbbf24 80% 90%, 
-                                    #10b981 90% 100%
+                                    #fcd34d 60% 70%, 
+                                    #fbbf24 70% 80%, 
+                                    #10b981 80% 100%
                                 );">
                                     <div class="absolute inset-0 rounded-full border-4 border-slate-900"></div>
                                 </div>
@@ -212,10 +211,9 @@
                                 <div class="space-y-3 w-full md:w-auto">
                                     <div class="flex items-center justify-between gap-4"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#0ea5e9]"></div><span class="font-bold">1st Place Net</span></div><span class="font-black text-sky-400">$20</span></div>
                                     <div class="flex items-center justify-between gap-4"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#38bdf8]"></div><span class="font-bold">2nd Place Net</span></div><span class="font-black text-sky-400">$10</span></div>
-                                    <div class="flex items-center justify-between gap-4"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#7dd3fc]"></div><span class="font-bold">3rd Place Net</span></div><span class="font-black text-sky-400">$5</span></div>
                                     <div class="flex items-center justify-between gap-4"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#fcd34d]"></div><span class="font-bold">KP on Hole 8</span></div><span class="font-black text-amber-400">$5</span></div>
                                     <div class="flex items-center justify-between gap-4"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#fbbf24]"></div><span class="font-bold">KP on Hole 17</span></div><span class="font-black text-amber-400">$5</span></div>
-                                    <div class="flex items-center justify-between gap-4"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#10b981]"></div><span class="font-bold">Most Net Pars+</span></div><span class="font-black text-emerald-400">$5</span></div>
+                                    <div class="flex items-center justify-between gap-4"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#10b981]"></div><span class="font-bold">2+ Natural Birdies</span></div><span class="font-black text-emerald-400">$10</span></div>
                                 </div>
                             </div>
                         </div>
@@ -286,7 +284,7 @@
                         <div class="col-span-4">Player</div>
                         <div class="col-span-2 text-center" title="Holes Played">Thru</div>
                         <div class="col-span-2 text-center" title="Total Gross Score">Gross</div>
-                        <div class="col-span-2 text-center text-emerald-500" title="Net Pars or Better">Pars+</div>
+                        <div class="col-span-2 text-center text-emerald-500" title="Natural Birdies">Birdies</div>
                         <div class="col-span-2 text-center text-sky-600" title="Net To Par">Net</div>
                     </div>
                     <div id="leaderboard-list" class="divide-y divide-slate-50">
@@ -723,13 +721,15 @@
                 let currentNetToPar = 0;
                 let currentGross = 0;
                 let holesPlayed = 0;
-                let netParsOrBetter = 0;
+                let naturalBirdies = 0;
 
                 for (let i = 1; i <= 18; i++) {
                     const gross = p.scores?.[i];
                     if (gross) {
                         holesPlayed++;
                         currentGross += parseInt(gross);
+                        
+                        if (parseInt(gross) < holePars[i]) naturalBirdies++;
 
                         if (!isNC) {
                             let strokesForHole = 0;
@@ -742,8 +742,6 @@
 
                             let netScore = parseInt(gross) - strokesForHole;
                             currentNetToPar += (netScore - holePars[i]);
-                            
-                            if (netScore <= holePars[i]) netParsOrBetter++;
                         }
                     }
                 }
@@ -753,7 +751,7 @@
                     hdcpDisplay: isNC ? 'NC' : p.handicap,
                     thru: holesPlayed === 18 ? 'F' : holesPlayed,
                     gross: holesPlayed > 0 ? currentGross : '-',
-                    netParsOrBetterDisplay: isNC ? 'N/A' : (holesPlayed > 0 ? netParsOrBetter : '-'),
+                    birdiesDisplay: holesPlayed > 0 ? naturalBirdies : '-',
                     netToPar: isNC ? 9999 : (holesPlayed > 0 ? currentNetToPar : 999), 
                     netToParDisplay: isNC ? 'N/A' : (holesPlayed === 0 ? '-' : (currentNetToPar === 0 ? 'E' : (currentNetToPar > 0 ? `+${currentNetToPar}` : currentNetToPar)))
                 };
@@ -775,7 +773,7 @@
                     </div>
                     <div class="col-span-2 text-center font-bold text-slate-500 text-xs md:text-sm">${p.thru}</div>
                     <div class="col-span-2 text-center font-black text-slate-700 text-xs md:text-sm">${p.gross}</div>
-                    <div class="col-span-2 text-center font-black ${isNCAesthetics ? 'text-slate-400' : 'text-emerald-600'} text-xs md:text-sm">${p.netParsOrBetterDisplay}</div>
+                    <div class="col-span-2 text-center font-black text-emerald-600 text-xs md:text-sm">${p.birdiesDisplay}</div>
                     <div class="col-span-2 text-center font-black text-base md:text-lg ${isNCAesthetics ? 'text-slate-400' : (p.netToPar < 0 ? 'text-rose-600' : (p.netToPar === 0 ? 'text-emerald-600' : 'text-slate-700'))}">${p.netToParDisplay}</div>
                 </div>
             `}).join('');
