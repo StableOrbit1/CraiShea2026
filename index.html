@@ -26,7 +26,6 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans min-h-screen pb-24 selection:bg-sky-200">
 
-    <!-- Loading Screen -->
     <div id="screen-loading" class="fixed inset-0 z-[200] bg-slate-900 flex flex-col items-center justify-center transition-opacity duration-300">
         <div class="relative w-16 h-16 flex items-center justify-center loader-ring mb-4">
             <div class="w-12 h-12 bg-sky-500 rounded-full flex items-center justify-center text-white">
@@ -36,7 +35,6 @@
         <p id="loading-text" class="text-sky-500 font-bold tracking-widest uppercase text-xs">Syncing Tournament...</p>
     </div>
 
-    <!-- Phone Auth Screen -->
     <div id="screen-phone" class="fixed inset-0 z-[100] bg-slate-900 flex flex-col items-center justify-center p-6 text-center hidden">
         <div class="bg-white p-10 rounded-[3rem] shadow-2xl max-w-sm w-full space-y-8">
             <div class="w-20 h-20 bg-sky-100 text-sky-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
@@ -50,13 +48,11 @@
                 <input type="tel" id="phone-input" required placeholder="+1 416 555 1234" class="w-full p-5 bg-slate-50 border-2 border-slate-100 focus:border-sky-500 rounded-2xl text-center font-black text-2xl outline-none tracking-widest">
                 <button type="submit" id="send-code-btn" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-sky-600 shadow-xl transition-all active-scale">Send Code</button>
             </form>
-            <!-- RECAPTCHA FIX: Give it explicit space to render -->
             <div id="recaptcha-container" class="mt-4 flex justify-center"></div>
             <div id="error-message-container"></div>
         </div>
     </div>
 
-    <!-- OTP Auth Screen -->
     <div id="screen-otp" class="fixed inset-0 z-[95] bg-slate-900 flex flex-col items-center justify-center p-6 text-center hidden">
         <div class="bg-white p-10 rounded-[3rem] shadow-2xl max-w-sm w-full space-y-8">
             <div class="w-20 h-20 bg-sky-100 text-sky-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
@@ -74,7 +70,6 @@
         </div>
     </div>
 
-    <!-- Registration Screen -->
     <div id="screen-register" class="fixed inset-0 z-[90] bg-slate-900 flex flex-col items-center justify-center p-6 text-center hidden overflow-y-auto">
         <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-2xl max-w-md w-full space-y-6 my-auto">
             <div class="w-20 h-20 bg-sky-100 text-sky-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
@@ -106,7 +101,6 @@
         </div>
     </div>
 
-    <!-- Admin Screen -->
     <div id="screen-admin" class="fixed inset-0 z-[300] bg-slate-900 overflow-y-auto hidden">
         <div class="max-w-md mx-auto bg-white min-h-screen p-6">
             <div class="flex justify-between items-center mb-8">
@@ -117,15 +111,12 @@
                 Check the box when a player pays their $50 entry fee.
             </div>
             <div class="space-y-3" id="admin-players-list">
-                <!-- JS Populated -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- Main Application -->
     <div id="screen-app" class="hidden">
         
-        <!-- Header & Nav -->
         <header class="bg-slate-900 text-white p-4 md:p-6 shadow-2xl sticky top-0 z-50">
             <div class="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="flex flex-col items-center md:items-start">
@@ -155,7 +146,6 @@
 
         <main class="max-w-4xl mx-auto p-4 md:p-8 space-y-12">
             
-            <!-- WTF Tab -->
             <section id="view-wtf" class="space-y-8 text-left animate-fade-in">
                 <div class="bg-white p-8 md:p-12 rounded-[3rem] shadow-xl border border-slate-200">
                     <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
@@ -163,7 +153,6 @@
                             <i data-lucide="info" class="w-7 h-7"></i>
                         </div>
                         <div>
-                            <!-- DOUBLE CLICK THIS TITLE FOR ADMIN -->
                             <h2 ondblclick="openAdmin()" class="text-3xl font-black text-slate-800 tracking-tight cursor-pointer select-none" title="Double click for Admin">The Details</h2>
                             <p class="text-[10px] font-black text-sky-600 uppercase tracking-widest mt-1">Saturday Oct 17 @ 11:00 AM</p>
                         </div>
@@ -197,7 +186,6 @@
                             <p class="text-center text-sm text-slate-300 mb-6">Entry is $50. All goes back to the pot, based on performance.</p>
                             
                             <div class="flex flex-col md:flex-row items-center justify-center gap-10">
-                                <!-- Pure CSS Pie Chart -->
                                 <div class="w-48 h-48 rounded-full shadow-lg shrink-0 relative" style="background: conic-gradient(
                                     #0ea5e9 0% 40%, 
                                     #38bdf8 40% 60%, 
@@ -222,18 +210,15 @@
                 </div>
             </section>
 
-            <!-- Groupings Tab -->
             <section id="view-groupings" class="hidden space-y-6 text-left">
                 <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl border border-slate-200">
                     <h2 class="text-3xl font-black text-slate-800 tracking-tight">Tee Times</h2>
                     <p class="text-[10px] font-black text-sky-600 uppercase tracking-widest mt-1">Saturday, October 17th</p>
                 </div>
                 <div id="groupings-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Javascript Populated -->
-                </div>
+                    </div>
             </section>
 
-            <!-- Live Scoring Tab -->
             <section id="view-scoring" class="hidden space-y-6 text-left">
                 <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
@@ -244,24 +229,20 @@
 
                 <div class="bg-white rounded-[3rem] shadow-xl border border-slate-200 p-6 md:p-8">
                     
-                    <!-- Group Scoring Sub Nav -->
                     <div id="scoring-sub-nav" class="flex gap-2 overflow-x-auto custom-scrollbar pb-2 mb-6 border-b border-slate-100">
-                        <!-- JS populated -->
-                    </div>
+                        </div>
 
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-lg font-black text-slate-800 tracking-tight uppercase">Front 9</h3>
                     </div>
                     <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-9 gap-3" id="front-9-inputs">
-                        <!-- JS populated -->
-                    </div>
+                        </div>
 
                     <div class="flex items-center justify-between mb-6 mt-10 border-t border-slate-100 pt-8">
                         <h3 class="text-lg font-black text-slate-800 tracking-tight uppercase">Back 9</h3>
                     </div>
                     <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-9 gap-3" id="back-9-inputs">
-                        <!-- JS populated -->
-                    </div>
+                        </div>
 
                     <button onclick="saveScores()" id="save-scores-btn" class="w-full bg-sky-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-sky-700 shadow-xl transition-all active-scale mt-10 flex items-center justify-center gap-2">
                         <i data-lucide="save" class="w-5 h-5"></i> Save Scorecard
@@ -269,7 +250,6 @@
                 </div>
             </section>
 
-            <!-- Leaderboard Tab -->
             <section id="view-leaderboard" class="hidden space-y-6 text-left">
                 <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
@@ -293,7 +273,6 @@
                 </div>
             </section>
 
-            <!-- Photowall Tab -->
             <section id="view-photowall" class="hidden space-y-6 text-left">
                 <div class="bg-slate-900 p-8 md:p-10 rounded-[3rem] shadow-xl text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
                     <div class="absolute -right-20 -top-20 w-64 h-64 bg-sky-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -310,21 +289,19 @@
                 </div>
                 
                 <div id="photowall-grid" class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-                    <!-- JS Populated -->
-                </div>
+                    </div>
             </section>
 
         </main>
     </div>
 
-    <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[1000] flex flex-col gap-2 pointer-events-none w-[90%] max-w-sm"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, initializeFirestore, persistentLocalCache, collection, doc, setDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, initializeFirestore, persistentLocalCache, collection, doc, setDoc, onSnapshot, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // NEW CraiShea Database Project Configuration
         const firebaseConfig = {
@@ -356,19 +333,6 @@
         const holePars = {1:4, 2:3, 3:4, 4:4, 5:4, 6:5, 7:5, 8:3, 9:4, 10:4, 11:5, 12:3, 13:4, 14:5, 15:4, 16:4, 17:3, 18:4};
         const strokeIndex = {1:9, 2:15, 3:3, 4:17, 5:11, 6:5, 7:1, 8:13, 9:7, 10:14, 11:4, 12:12, 13:18, 14:2, 15:6, 16:10, 17:16, 18:8};
 
-        const groupings = [
-            { time: "11:00", players: ["Alex Samson", "Lou Soriano", "Jordan Baker"] },
-            { time: "11:10", players: ["Jacob Scriven", "Dave Ashwood", "Justin Cogan", "Rob Nichols"] },
-            { time: "11:20", players: ["Scott Watson", "Craig Flannagan", "Tyler Risdon", "Charlie McKinlay"] },
-            { time: "11:30", players: ["Mike Flannagan", "Colin Moore", "Dave Spylo", "Bailey Farrell"] },
-            { time: "11:40", players: ["Luke Coles", "Jordan Horowitz", "Dave McCharles", "Sean McBurney"] },
-            { time: "11:50", players: ["Dave Ashwood", "Jesse Rabishaw", "Shea Burton", "Nick Coulson"] }, // Wait, Dave Ashwood was 11:10? Assuming Brandon Benn was swapped here. Wait, requested swap: "Switch Dave McCharles and Brandon Benn". So Brandon is 11:40, Dave is 11:50. Oh wait, Dave McCharles. So Brandon Benn is 11:40. Dave McCharles is 11:50.
-            // Let's manually ensure the swap is exactly as requested above:
-            // "Switch Dave McCharles and Brandon Benn"
-            // So 11:40 has Brandon Benn. 11:50 has Dave McCharles.
-        ];
-        
-        // Corrected Groupings based on exact instructions
         const finalGroupings = [
             { time: "11:00", players: ["Alex Samson", "Lou Soriano", "Jordan Baker"] },
             { time: "11:10", players: ["Jacob Scriven", "Dave Ashwood", "Justin Cogan", "Rob Nichols"] },
@@ -486,10 +450,9 @@
             if (firebaseUser && firebaseUser.phoneNumber) {
                 listenToDatabase(firebaseUser.phoneNumber);
             } else {
-                // Initialize Recaptcha ONCE when showing the phone screen.
                 if (!window.recaptchaVerifier) {
                      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 
-                        'size': 'invisible', // Try invisible first
+                        'size': 'invisible',
                         'callback': (response) => { console.log("Captcha solved."); },
                         'expired-callback': () => { if(window.recaptchaVerifier) window.recaptchaVerifier.reset(); }
                     });
@@ -506,30 +469,22 @@
             const btn = document.getElementById('send-code-btn');
             btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin inline"></i> Sending...'; btn.disabled = true; lucide.createIcons();
             const errContainer = document.getElementById('error-message-container');
-            errContainer.innerHTML = ''; // clear previous errors
+            errContainer.innerHTML = '';
 
             try {
                 window.confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
                 showScreen('otp');
             } catch(err) {
                 console.error(err);
-                
-                // If it fails, clear the verifier so they can try again.
                 if (window.recaptchaVerifier) {
                     window.recaptchaVerifier.clear();
-                    // Re-initialize for the next attempt.
-                    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 
-                        'size': 'invisible'
-                    });
+                    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
                 }
-                
-                // Show exact error on screen so we know why it failed (e.g. auth/captcha-check-failed)
                 errContainer.innerHTML = `
                     <div class="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-xl text-xs font-bold mt-4 text-left">
                         <i data-lucide="alert-circle" class="w-4 h-4 inline mb-0.5 mr-1"></i> SMS Error: ${err.code || err.message}
                     </div>
                 `;
-                
                 showToast(`Auth Error: ${err.message}`, true);
                 btn.innerHTML = 'Send Code'; btn.disabled = false;
                 lucide.createIcons();
@@ -601,7 +556,6 @@
                 if (myProfile) {
                     currentUserData = myProfile;
                     
-                    // Identify Tee Group for Group Scoring
                     for (let g of finalGroupings) {
                         if (g.players.some(p => p.toLowerCase() === currentUserData.name.toLowerCase())) {
                             myGroupNames = g.players; break;
@@ -739,7 +693,6 @@
                                 let plusCh = Math.abs(courseHdcp);
                                 strokesForHole = -(Math.floor(plusCh / 18) + ((19 - strokeIndex[i]) <= (plusCh % 18) ? 1 : 0));
                             }
-
                             let netScore = parseInt(gross) - strokesForHole;
                             currentNetToPar += (netScore - holePars[i]);
                         }
@@ -789,11 +742,9 @@
             btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Uploading...`; btn.style.pointerEvents = 'none'; lucide.createIcons();
 
             try {
-                // Reduced size to 800x800 to prevent iOS Safari memory crashes which cause infinite spinning
                 const compressedBlob = await compressImage(file, 800, 800, 0.6);
                 const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
                 
-                // Reverted to match_photos to exactly match your Firebase Storage Security Rules
                 const storageRef = ref(storage, `match_photos/${activeAppId}/${Date.now()}_${safeName}`);
                 await uploadBytes(storageRef, compressedBlob);
                 const url = await getDownloadURL(storageRef);
@@ -814,6 +765,22 @@
             }
         }
 
+        window.deletePhoto = async function(docId, photoUrl) {
+            if (!confirm("Are you sure you want to delete this photo?")) return;
+            
+            try {
+                await deleteDoc(doc(db, 'artifacts', activeAppId, 'public', 'data', 'photos', docId));
+                
+                const photoRef = ref(storage, photoUrl);
+                await deleteObject(photoRef);
+                
+                showToast("Photo deleted!");
+            } catch(err) {
+                console.error(err);
+                showToast(`Error deleting photo: ${err.message}`, true);
+            }
+        }
+
         function renderPhotowall() {
             const grid = document.getElementById('photowall-grid');
             if (allPhotos.length === 0) {
@@ -821,19 +788,29 @@
                 return;
             }
 
-            grid.innerHTML = allPhotos.map(p => `
+            grid.innerHTML = allPhotos.map(p => {
+                const canDelete = currentUserData && p.uploadedBy === currentUserData.name;
+                const deleteBtn = canDelete ? `
+                    <button onclick="deletePhoto('${p.id}', '${p.url}')" class="absolute top-2 right-2 bg-slate-900/80 text-white p-2 rounded-full hover:bg-rose-500 transition-colors z-20 shadow-lg" title="Delete Photo">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                ` : '';
+
+                return `
                 <div class="relative group aspect-square rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm">
+                    ${deleteBtn}
                     <img src="${p.url}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy">
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3 text-left">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3 text-left pointer-events-none">
                         <span class="text-white text-[10px] font-black uppercase tracking-widest truncate">📸 ${p.uploadedBy}</span>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
+            
+            lucide.createIcons();
         }
 
         const compressImage = async (file, maxWidth = 800, maxHeight = 800, quality = 0.6) => {
             return new Promise((resolve, reject) => {
-                // Add a strict 10-second timeout so it never "spins forever" on unsupported HEIC formats
                 const timeout = setTimeout(() => reject(new Error('Image processing timed out. Try a different format.')), 10000);
                 
                 const img = new Image(); 
