@@ -8,66 +8,64 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         .hidden { display: none !important; }
-        input, select { -webkit-appearance: none; }
         .active-scale:active { transform: scale(0.96); }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        @keyframes splashFadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+        
+        /* Loading Animation */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1.3); opacity: 0; }
         }
-        .splash-animate { animation: splashFadeIn 0.8s ease-out forwards; }
+        .loader-ring::before {
+            content: ''; position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: #0ea5e9; border-radius: 50%; z-index: -1; animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans min-h-screen pb-24 text-center">
-
-    <!-- Splash Screen -->
-    <div id="screen-splash" class="fixed inset-0 z-[600] bg-slate-900 flex flex-col items-center justify-center transition-opacity duration-1000 overflow-hidden">
-        <h1 class="text-5xl md:text-7xl font-black text-white tracking-tighter splash-animate drop-shadow-2xl">
-            CRAI<span class="text-sky-500">SHEA</span>
-        </h1>
-        <p class="text-sky-400 font-bold tracking-[0.3em] uppercase mt-4 splash-animate" style="animation-delay: 0.2s;">2026</p>
-    </div>
+<body class="bg-slate-50 text-slate-900 font-sans min-h-screen pb-24 selection:bg-sky-200">
 
     <!-- Loading Screen -->
-    <div id="screen-loading" class="fixed inset-0 z-[200] bg-slate-50 flex items-center justify-center hidden">
-        <div class="font-black text-slate-400 uppercase tracking-widest flex items-center gap-3 animate-pulse">
-            <i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> Syncing Tournament...
+    <div id="screen-loading" class="fixed inset-0 z-[200] bg-slate-900 flex items-center justify-center transition-opacity duration-300">
+        <div class="relative w-16 h-16 flex items-center justify-center loader-ring">
+            <div class="w-12 h-12 bg-sky-500 rounded-full flex items-center justify-center text-white">
+                <i data-lucide="flag" class="w-6 h-6"></i>
+            </div>
         </div>
     </div>
 
     <!-- Phone Auth Screen -->
     <div id="screen-phone" class="fixed inset-0 z-[100] bg-slate-900 flex flex-col items-center justify-center p-6 text-center hidden">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl max-w-sm w-full space-y-8 relative overflow-hidden">
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl max-w-sm w-full space-y-8">
             <div class="w-20 h-20 bg-sky-100 text-sky-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
                 <i data-lucide="smartphone" class="w-10 h-10"></i>
             </div>
             <div>
-                <h2 class="text-3xl font-black text-slate-800 tracking-tight leading-tight">Player Login</h2>
-                <p class="text-slate-500 text-sm mt-3 font-medium">Enter your mobile number to access CraiShea 2026.</p>
+                <h2 class="text-3xl font-black text-slate-800 tracking-tight">CraiShea 2026</h2>
+                <p class="text-slate-500 text-sm mt-3 font-medium">Enter your mobile number to access the tournament.</p>
             </div>
             <form id="phone-form" onsubmit="sendOTP(event)" class="space-y-4">
-                <input type="tel" id="phone-input" required placeholder="+1 416 555 1234" class="w-full p-5 bg-slate-50 border-2 border-slate-100 focus:border-sky-500 rounded-2xl text-center font-black text-2xl outline-none tracking-widest transition-colors">
-                <button type="submit" id="send-code-btn" class="w-full bg-sky-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-sky-700 shadow-xl transition-all active-scale">Send Code</button>
+                <input type="tel" id="phone-input" required placeholder="+1 416 555 1234" class="w-full p-5 bg-slate-50 border-2 border-slate-100 focus:border-sky-500 rounded-2xl text-center font-black text-2xl outline-none tracking-widest">
+                <button type="submit" id="send-code-btn" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-sky-600 shadow-xl transition-all active-scale">Send Code</button>
             </form>
             <div id="recaptcha-container"></div>
         </div>
     </div>
 
-    <!-- OTP Verification Screen -->
+    <!-- OTP Auth Screen -->
     <div id="screen-otp" class="fixed inset-0 z-[95] bg-slate-900 flex flex-col items-center justify-center p-6 text-center hidden">
         <div class="bg-white p-10 rounded-[3rem] shadow-2xl max-w-sm w-full space-y-8">
             <div class="w-20 h-20 bg-sky-100 text-sky-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
                 <i data-lucide="shield-check" class="w-10 h-10"></i>
             </div>
             <div>
-                <h2 class="text-3xl font-black text-slate-800 tracking-tight leading-tight">Verification</h2>
+                <h2 class="text-3xl font-black text-slate-800 tracking-tight">Verification</h2>
                 <p class="text-slate-500 text-sm mt-3 font-medium">Enter the 6-digit code sent to your phone.</p>
             </div>
             <form id="otp-form" onsubmit="verifyOTP(event)" class="space-y-4">
-                <input type="number" id="otp-input" required placeholder="123456" class="w-full p-5 bg-slate-50 border-2 border-slate-100 focus:border-sky-500 rounded-2xl text-center font-black text-3xl outline-none tracking-[0.5em] transition-colors">
-                <button type="submit" id="verify-code-btn" class="w-full bg-sky-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-sky-700 shadow-xl transition-all active-scale">Verify Code</button>
+                <input type="number" id="otp-input" required placeholder="123456" class="w-full p-5 bg-slate-50 border-2 border-slate-100 focus:border-sky-500 rounded-2xl text-center font-black text-3xl outline-none tracking-[0.5em]">
+                <button type="submit" id="verify-code-btn" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-sky-600 shadow-xl transition-all active-scale">Verify</button>
                 <button type="button" onclick="showScreen('phone')" class="w-full py-3 text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors">Cancel</button>
             </form>
         </div>
@@ -75,306 +73,209 @@
 
     <!-- Registration Screen -->
     <div id="screen-register" class="fixed inset-0 z-[90] bg-slate-900 flex flex-col items-center justify-center p-6 text-center hidden">
-        <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-2xl max-w-sm w-full space-y-6 overflow-y-auto max-h-[90vh] custom-scrollbar">
-            <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner shrink-0">
+        <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-2xl max-w-md w-full space-y-6">
+            <div class="w-20 h-20 bg-sky-100 text-sky-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
                 <i data-lucide="user-plus" class="w-10 h-10"></i>
             </div>
             <div>
-                <h2 class="text-3xl font-black text-slate-800 tracking-tighter">Join the Field</h2>
+                <h2 class="text-3xl font-black text-slate-800 tracking-tight">Welcome to CraiShea</h2>
+                <p class="text-slate-500 text-sm mt-2 font-medium leading-relaxed">Please register to enter the tournament dashboard.</p>
             </div>
-            <div class="bg-rose-50 border border-rose-200 p-4 rounded-2xl text-left">
-                <p class="text-[10px] font-black uppercase tracking-widest text-rose-600 mb-1 flex items-center gap-1"><i data-lucide="alert-triangle" class="w-3 h-3"></i> Net Event Warning</p>
-                <p class="text-xs text-rose-800 font-bold leading-relaxed">This is a NET event with prizes. Enter your verified Golf Canada handicap. Sandbaggers will be dunked in the 8th pond.</p>
-            </div>
-            <form id="register-form" onsubmit="registerProfile(event)" class="space-y-3">
-                <input type="text" id="reg-name" required placeholder="Full Name" class="w-full p-4 bg-slate-50 border-2 border-slate-100 focus:border-amber-500 rounded-2xl text-center font-black text-lg outline-none transition-colors">
-                <input type="text" id="reg-handicap" required placeholder="Handicap Index (e.g. 12.4 or +2.0)" class="w-full p-4 bg-slate-50 border-2 border-slate-100 focus:border-amber-500 rounded-2xl text-center font-black text-lg outline-none transition-colors">
-                <button type="submit" id="register-btn" class="w-full bg-amber-500 text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-amber-600 shadow-xl transition-all active-scale mt-2">Register</button>
+            <form id="register-form" onsubmit="registerUser(event)" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1">Full Name</label>
+                    <input type="text" id="reg-name" required placeholder="Tiger Woods" class="w-full p-4 bg-slate-50 border-2 border-slate-100 focus:border-sky-500 rounded-2xl font-bold text-slate-800 outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1">Verified Handicap</label>
+                    <input type="text" id="reg-hdcp" required placeholder="e.g. 10.5 or +2" class="w-full p-4 bg-slate-50 border-2 border-slate-100 focus:border-sky-500 rounded-2xl font-bold text-slate-800 outline-none">
+                </div>
+                <div class="bg-rose-50 border border-rose-100 p-4 rounded-xl text-rose-800 text-xs font-medium leading-relaxed mt-2">
+                    <span class="font-bold uppercase tracking-wider block mb-1"><i data-lucide="alert-triangle" class="w-4 h-4 inline pb-0.5"></i> Warning</span>
+                    This is a competitive net event. Sandbaggers will be ceremoniously dunked in the 8th pond.
+                </div>
+                <button type="submit" id="register-btn" class="w-full bg-sky-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-sky-700 shadow-xl transition-all active-scale mt-4">Join Tournament</button>
             </form>
         </div>
     </div>
 
-    <!-- Main App -->
+    <!-- Main Application -->
     <div id="screen-app" class="hidden">
+        
+        <!-- Header & Nav -->
         <header class="bg-slate-900 text-white p-4 md:p-6 shadow-2xl sticky top-0 z-50">
-            <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="flex flex-col items-center md:items-start w-full md:w-auto flex-shrink-0">
-                    <h1 class="text-2xl font-black flex items-center gap-2 tracking-tighter uppercase">
-                        <i data-lucide="flag-triangle-right" class="w-6 h-6 text-sky-400"></i> CRAI<span class="text-sky-400">SHEA</span>
+            <div class="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex flex-col items-center md:items-start">
+                    <h1 class="text-2xl font-black flex items-center gap-2 tracking-tight uppercase text-sky-400">
+                        <i data-lucide="flag-triangle-right" class="w-6 h-6 text-white"></i> CRAI<span class="text-white">SHEA</span>
                     </h1>
                 </div>
-                
-                <nav class="flex bg-slate-800 rounded-2xl p-1.5 w-full overflow-x-auto custom-scrollbar flex-nowrap md:w-auto shrink-0 shadow-inner">
-                    <button onclick="switchView('wtf')" id="nav-wtf" class="flex-1 py-3 px-4 rounded-xl font-black text-[10px] md:text-xs uppercase transition-all bg-white text-slate-900 shadow-sm whitespace-nowrap">
+                <nav class="flex bg-slate-800/80 rounded-2xl p-1.5 w-full md:w-auto border border-slate-700/50 backdrop-blur-sm overflow-x-auto custom-scrollbar">
+                    <button onclick="switchView('wtf')" id="nav-wtf" class="flex-1 py-3 px-4 rounded-xl font-black text-[10px] md:text-xs uppercase transition-all bg-sky-500 text-white shadow-sm flex items-center gap-2 justify-center whitespace-nowrap">
                         WTF is CraiShea
                     </button>
-                    <button onclick="switchView('groupings')" id="nav-groupings" class="flex-1 py-3 px-4 rounded-xl font-black text-[10px] md:text-xs uppercase transition-all text-slate-300 hover:text-white whitespace-nowrap">
+                    <button onclick="switchView('groupings')" id="nav-groupings" class="flex-1 py-3 px-4 rounded-xl font-black text-[10px] md:text-xs uppercase transition-all text-slate-300 opacity-60 flex items-center gap-2 justify-center whitespace-nowrap hover:opacity-100 hover:text-white">
                         Groupings
                     </button>
-                    <button onclick="switchView('scoring')" id="nav-scoring" class="flex-1 py-3 px-4 rounded-xl font-black text-[10px] md:text-xs uppercase transition-all text-slate-300 hover:text-white whitespace-nowrap">
+                    <button onclick="switchView('scoring')" id="nav-scoring" class="flex-1 py-3 px-4 rounded-xl font-black text-[10px] md:text-xs uppercase transition-all text-slate-300 opacity-60 flex items-center gap-2 justify-center whitespace-nowrap hover:opacity-100 hover:text-white">
                         Live Scoring
                     </button>
-                    <button onclick="switchView('leaderboard')" id="nav-leaderboard" class="flex-1 py-3 px-4 rounded-xl font-black text-[10px] md:text-xs uppercase transition-all text-slate-300 hover:text-white whitespace-nowrap">
+                    <button onclick="switchView('leaderboard')" id="nav-leaderboard" class="flex-1 py-3 px-4 rounded-xl font-black text-[10px] md:text-xs uppercase transition-all text-slate-300 opacity-60 flex items-center gap-2 justify-center whitespace-nowrap hover:opacity-100 hover:text-white">
                         Leaderboard
                     </button>
-                    <button onclick="switchView('photowall')" id="nav-photowall" class="flex-1 py-3 px-4 rounded-xl font-black text-[10px] md:text-xs uppercase transition-all text-slate-300 hover:text-white whitespace-nowrap">
+                    <button onclick="switchView('photowall')" id="nav-photowall" class="flex-1 py-3 px-4 rounded-xl font-black text-[10px] md:text-xs uppercase transition-all text-slate-300 opacity-60 flex items-center gap-2 justify-center whitespace-nowrap hover:opacity-100 hover:text-white">
                         Photowall
                     </button>
                 </nav>
             </div>
         </header>
 
-        <main class="max-w-5xl mx-auto p-4 md:p-8 space-y-12">
+        <main class="max-w-4xl mx-auto p-4 md:p-8 space-y-12">
             
-            <!-- VIEW: WTF IS CRAISHEA -->
-            <section id="view-wtf" class="space-y-8 text-left">
+            <!-- WTF Tab -->
+            <section id="view-wtf" class="space-y-8 text-left animate-fade-in">
                 <div class="bg-white p-8 md:p-12 rounded-[3rem] shadow-xl border border-slate-200">
-                    <div class="flex items-center gap-4 mb-8">
-                        <div class="w-16 h-16 bg-sky-100 text-sky-600 rounded-2xl flex items-center justify-center shadow-inner shrink-0">
-                            <i data-lucide="info" class="w-8 h-8"></i>
+                    <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+                        <div class="w-14 h-14 bg-sky-100 text-sky-600 rounded-2xl flex items-center justify-center shrink-0">
+                            <i data-lucide="info" class="w-7 h-7"></i>
                         </div>
                         <div>
-                            <h2 class="text-3xl md:text-4xl font-black text-slate-800 tracking-tight leading-none">The Details</h2>
-                            <p class="text-xs font-bold text-sky-600 uppercase tracking-widest mt-2">Tournament Information</p>
+                            <h2 class="text-3xl font-black text-slate-800 tracking-tight">The Details</h2>
+                            <p class="text-[10px] font-black text-sky-600 uppercase tracking-widest mt-1">Saturday Oct 17 @ 11:00 AM</p>
                         </div>
                     </div>
                     
                     <div class="space-y-6 text-slate-600 font-medium leading-relaxed">
-                        <p class="text-lg leading-relaxed"><strong>CraiShea 2026</strong> is the 3rd Annual Season Ending Birthday Celebration for Craig & Shea . . . not an overly creative name.</p>
-                        <p class="text-slate-500">Entry is <strong>$50</strong>, with all of that going back to the participants, based on their performance.</p>
+                        <p class="text-lg text-slate-800 font-bold">CraiShea 2026 is the 3rd Annual Season Ending Birthday Celebration for Craig & Shea . . . not an overly creative name.</p>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                            <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4"></i> Date & Time</h3>
-                                <p class="text-xl font-black text-slate-800 tracking-tight">Saturday, October 17th</p>
-                                <p class="text-sm font-bold text-slate-500 mt-1">First Tee: 11:00 AM</p>
-                            </div>
-                            <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i> Venue</h3>
-                                <p class="text-xl font-black text-slate-800 tracking-tight">The Nest at Friday Harbour</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-sky-50 border border-sky-100 p-6 rounded-3xl mt-4">
-                            <h3 class="text-lg font-black text-sky-800 tracking-tight mb-4 flex items-center gap-2"><i data-lucide="clipboard-list" class="w-5 h-5"></i> The Rules</h3>
-                            <ul class="space-y-4 text-sky-800">
-                                <li class="flex gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 shrink-0 text-sky-500"></i> <span><strong>Tees:</strong> We will be playing hybrid blue / gold tees.</span></li>
-                                <li class="flex gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 shrink-0 text-sky-500"></i> <span><strong>Play your own ball.</strong></span></li>
-                                <li class="flex gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 shrink-0 text-sky-500"></i> <span>Can move out of divots in the fairway and footprints in the traps.</span></li>
-                                <li class="flex gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 shrink-0 text-sky-500"></i> <span><strong>The Breakfast Ball:</strong> Available on hole one, but if you elect to hit a second ball, you're committed to it.</span></li>
-                                <li class="flex gap-3"><i data-lucide="gift" class="w-5 h-5 shrink-0 text-rose-500"></i> <span><strong>NEW: The Birthday Ball.</strong> You can drop and replay <em>one shot</em> in your round, from anywhere except the green. Swings, no putts.</span></li>
+                        <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                            <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2"><i data-lucide="book-open" class="w-5 h-5 text-sky-500"></i> The Rules</h3>
+                            <ul class="space-y-3">
+                                <li class="flex items-start gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 text-sky-500 shrink-0 mt-0.5"></i> Play your own ball.</li>
+                                <li class="flex items-start gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 text-sky-500 shrink-0 mt-0.5"></i> Hybrid Blue/Gold tees will be played.</li>
+                                <li class="flex items-start gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 text-sky-500 shrink-0 mt-0.5"></i> Can move out of divots in the fairway and footprints in the traps.</li>
+                                <li class="flex items-start gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 text-sky-500 shrink-0 mt-0.5"></i> <strong>Breakfast ball on one</strong>, but if you elect to hit a second ball, you're committed to it.</li>
+                                <li class="flex items-start gap-3"><i data-lucide="gift" class="w-5 h-5 text-rose-500 shrink-0 mt-0.5"></i> <strong>NEW: The Birthday Ball!</strong> You can drop and replay one shot in your round, from anywhere except the green. Swings, no putts.</li>
                             </ul>
                         </div>
 
-                        <div class="bg-slate-50 border border-slate-200 p-6 md:p-8 rounded-3xl mt-4">
-                            <h3 class="text-lg font-black text-slate-800 tracking-tight mb-6 flex items-center gap-2"><i data-lucide="pie-chart" class="w-5 h-5 text-indigo-500"></i> The $50 Entry Breakdown</h3>
+                        <div class="bg-slate-900 p-8 rounded-3xl text-white shadow-xl mt-8">
+                            <h3 class="text-sm font-black text-sky-400 uppercase tracking-widest mb-6 text-center">Entry is $50. All goes back to the pot.</h3>
                             
-                            <div class="flex flex-col md:flex-row items-center gap-8">
-                                <!-- Pure CSS Pie Chart mapping exactly to the percentages -->
-                                <div class="w-48 h-48 rounded-full shadow-lg shrink-0 border-4 border-white" style="background: conic-gradient(#0ea5e9 0% 40%, #6366f1 40% 60%, #10b981 60% 70%, #f59e0b 70% 80%, #f43f5e 80% 90%, #a855f7 90% 100%);"></div>
+                            <div class="flex flex-col md:flex-row items-center justify-center gap-10">
+                                <!-- Pure CSS Pie Chart -->
+                                <div class="w-48 h-48 rounded-full shadow-lg shrink-0 relative" style="background: conic-gradient(
+                                    #0ea5e9 0% 40%, 
+                                    #38bdf8 40% 60%, 
+                                    #7dd3fc 60% 70%, 
+                                    #fcd34d 70% 80%, 
+                                    #fbbf24 80% 90%, 
+                                    #10b981 90% 100%
+                                );">
+                                    <div class="absolute inset-0 rounded-full border-4 border-slate-900"></div>
+                                </div>
                                 
-                                <!-- Legend -->
-                                <div class="space-y-3 w-full">
-                                    <div class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm border border-slate-100">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-500 flex items-center justify-center shrink-0"><i data-lucide="trophy" class="w-4 h-4"></i></div>
-                                            <span class="font-bold text-slate-700 text-sm">Winning Net Score</span>
-                                        </div>
-                                        <span class="font-black text-sky-600">$20</span>
-                                    </div>
-                                    <div class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm border border-slate-100">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-500 flex items-center justify-center shrink-0"><i data-lucide="medal" class="w-4 h-4"></i></div>
-                                            <span class="font-bold text-slate-700 text-sm">2nd Place Net Score</span>
-                                        </div>
-                                        <span class="font-black text-indigo-600">$10</span>
-                                    </div>
-                                    <div class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm border border-slate-100">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-500 flex items-center justify-center shrink-0"><i data-lucide="award" class="w-4 h-4"></i></div>
-                                            <span class="font-bold text-slate-700 text-sm">3rd Place Net Score</span>
-                                        </div>
-                                        <span class="font-black text-emerald-600">$5</span>
-                                    </div>
-                                    <div class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm border border-slate-100">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-500 flex items-center justify-center shrink-0"><i data-lucide="target" class="w-4 h-4"></i></div>
-                                            <span class="font-bold text-slate-700 text-sm">Closest to the Pin (8)</span>
-                                        </div>
-                                        <span class="font-black text-amber-600">$5</span>
-                                    </div>
-                                    <div class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm border border-slate-100">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-500 flex items-center justify-center shrink-0"><i data-lucide="crosshair" class="w-4 h-4"></i></div>
-                                            <span class="font-bold text-slate-700 text-sm">Closest to the Pin (17)</span>
-                                        </div>
-                                        <span class="font-black text-rose-600">$5</span>
-                                    </div>
-                                    <div class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm border border-slate-100">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-500 flex items-center justify-center shrink-0"><i data-lucide="check-square" class="w-4 h-4"></i></div>
-                                            <span class="font-bold text-slate-700 text-sm">Most Net Pars or Better</span>
-                                        </div>
-                                        <span class="font-black text-purple-600">$5</span>
-                                    </div>
+                                <div class="space-y-3 w-full md:w-auto">
+                                    <div class="flex items-center justify-between gap-4"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#0ea5e9]"></div><span class="font-bold">1st Place Net</span></div><span class="font-black text-sky-400">$20</span></div>
+                                    <div class="flex items-center justify-between gap-4"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#38bdf8]"></div><span class="font-bold">2nd Place Net</span></div><span class="font-black text-sky-400">$10</span></div>
+                                    <div class="flex items-center justify-between gap-4"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#7dd3fc]"></div><span class="font-bold">3rd Place Net</span></div><span class="font-black text-sky-400">$5</span></div>
+                                    <div class="flex items-center justify-between gap-4"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#fcd34d]"></div><span class="font-bold">KP on Hole 8</span></div><span class="font-black text-amber-400">$5</span></div>
+                                    <div class="flex items-center justify-between gap-4"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#fbbf24]"></div><span class="font-bold">KP on Hole 17</span></div><span class="font-black text-amber-400">$5</span></div>
+                                    <div class="flex items-center justify-between gap-4"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#10b981]"></div><span class="font-bold">Most Net Pars+</span></div><span class="font-black text-emerald-400">$5</span></div>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl mt-6 flex items-center gap-3 shadow-sm">
-                            <i data-lucide="alert-circle" class="w-6 h-6 text-amber-500 shrink-0"></i>
-                            <p class="text-sm font-bold text-amber-700">Side games in your group are highly encouraged.</p>
-                        </div>
-                        
-                        <div class="flex justify-center pt-8 border-t border-slate-100">
-                            <button onclick="logout()" class="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-rose-500 transition-colors flex items-center gap-2">
-                                <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out
-                            </button>
-                        </div>
+                        <p class="text-center text-xs font-bold uppercase tracking-widest text-slate-400 mt-6">Side games in your group are highly encouraged.</p>
                     </div>
                 </div>
             </section>
 
-            <!-- VIEW: GROUPINGS -->
-            <section id="view-groupings" class="hidden space-y-8 text-left">
+            <!-- Groupings Tab -->
+            <section id="view-groupings" class="hidden space-y-6 text-left">
                 <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl border border-slate-200">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 shadow-inner">
-                            <i data-lucide="users" class="w-6 h-6"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-3xl font-black text-slate-800 tracking-tight">Tee Times</h2>
-                            <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-1">Official Groupings</p>
-                        </div>
-                    </div>
-                    
-                    <div id="groupings-container" class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Rendered via JS -->
-                    </div>
+                    <h2 class="text-3xl font-black text-slate-800 tracking-tight">Tee Times</h2>
+                    <p class="text-[10px] font-black text-sky-600 uppercase tracking-widest mt-1">Saturday, October 17th</p>
+                </div>
+                <div id="groupings-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Javascript Populated -->
                 </div>
             </section>
 
-            <!-- VIEW: LIVE SCORING -->
-            <section id="view-scoring" class="hidden space-y-8 text-left">
-                <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl border border-slate-200">
-                    <div class="flex flex-col md:flex-row justify-between md:items-center gap-6 mb-8">
-                        <div>
-                            <h2 class="text-3xl font-black text-slate-800 tracking-tight">Live Scorecard</h2>
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Enter Gross Scores</p>
-                        </div>
-                        <div class="relative w-full md:w-auto">
-                            <div class="bg-sky-50 border border-sky-100 px-6 py-4 rounded-2xl flex items-center gap-3">
-                                <div class="w-8 h-8 bg-sky-200/50 text-sky-600 rounded-full flex items-center justify-center shrink-0">
-                                    <i data-lucide="user" class="w-4 h-4"></i>
-                                </div>
-                                <div class="text-left">
-                                    <p class="text-[10px] font-black text-sky-600 uppercase tracking-widest">Scoring As</p>
-                                    <p id="scoring-current-user" class="text-sm font-black text-slate-800 tracking-tight truncate max-w-[180px]">-</p>
-                                </div>
-                            </div>
-                        </div>
+            <!-- Live Scoring Tab -->
+            <section id="view-scoring" class="hidden space-y-6 text-left">
+                <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-3xl font-black text-slate-800 tracking-tight">Digital Scorecard</h2>
+                        <p class="text-[10px] font-black text-sky-600 uppercase tracking-widest mt-1">Input Gross Scores Only</p>
+                    </div>
+                    <div id="scoring-as-badge" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200 shadow-sm flex items-center gap-2">
+                        <i data-lucide="user" class="w-4 h-4"></i> Scoring as: <span id="scoring-as-name" class="text-sky-600">Loading...</span>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[3rem] shadow-xl border border-slate-200 p-6 md:p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-black text-slate-800 tracking-tight uppercase">Front 9</h3>
+                    </div>
+                    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-9 gap-3" id="front-9-inputs">
+                        <!-- JS populated -->
                     </div>
 
-                    <div id="scorecard-empty" class="text-center py-12 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 text-slate-400 font-bold uppercase tracking-widest text-sm">
-                        Loading your scorecard...
+                    <div class="flex items-center justify-between mb-6 mt-10 border-t border-slate-100 pt-8">
+                        <h3 class="text-lg font-black text-slate-800 tracking-tight uppercase">Back 9</h3>
                     </div>
-                    
-                    <form id="scorecard-form" class="hidden space-y-8" onsubmit="saveScorecard(event)">
-                        
-                        <!-- Front 9 -->
-                        <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                            <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Front 9</h3>
-                            <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-3">
-                                <!-- JS will loop this 1-9 -->
-                                <script>
-                                    for(let i=1; i<=9; i++) {
-                                        document.write(`
-                                            <div class="text-center">
-                                                <label class="block text-[10px] font-bold text-slate-400 mb-1">Hole ${i}</label>
-                                                <input type="number" min="1" max="20" id="hole-${i}" class="w-full bg-white border border-slate-200 rounded-xl p-3 text-center font-black text-lg text-slate-800 focus:border-sky-500 outline-none shadow-sm">
-                                            </div>
-                                        `);
-                                    }
-                                </script>
-                            </div>
-                        </div>
+                    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-9 gap-3" id="back-9-inputs">
+                        <!-- JS populated -->
+                    </div>
 
-                        <!-- Back 9 -->
-                        <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                            <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Back 9</h3>
-                            <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-3">
-                                <!-- JS will loop this 10-18 -->
-                                <script>
-                                    for(let i=10; i<=18; i++) {
-                                        document.write(`
-                                            <div class="text-center">
-                                                <label class="block text-[10px] font-bold text-slate-400 mb-1">Hole ${i}</label>
-                                                <input type="number" min="1" max="20" id="hole-${i}" class="w-full bg-white border border-slate-200 rounded-xl p-3 text-center font-black text-lg text-slate-800 focus:border-sky-500 outline-none shadow-sm">
-                                            </div>
-                                        `);
-                                    }
-                                </script>
-                            </div>
-                        </div>
-
-                        <div class="pt-4">
-                            <button type="submit" id="save-score-btn" class="w-full bg-sky-600 text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-sky-700 shadow-xl transition-all active-scale flex items-center justify-center gap-2">
-                                <i data-lucide="save" class="w-5 h-5"></i> Save Scorecard
-                            </button>
-                        </div>
-                    </form>
+                    <button onclick="saveScores()" id="save-scores-btn" class="w-full bg-sky-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-sky-700 shadow-xl transition-all active-scale mt-10 flex items-center justify-center gap-2">
+                        <i data-lucide="save" class="w-5 h-5"></i> Save Scorecard
+                    </button>
                 </div>
             </section>
 
-            <!-- VIEW: LEADERBOARD -->
-            <section id="view-leaderboard" class="hidden space-y-8 text-left">
-                <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl border border-slate-200">
-                    <div class="flex items-center gap-4 mb-2">
-                        <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shadow-inner">
-                            <i data-lucide="medal" class="w-6 h-6"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-3xl font-black text-slate-800 tracking-tight">Live Leaderboard</h2>
-                            <p class="text-[10px] font-black text-amber-600 uppercase tracking-widest mt-1">CraiShea 2026 Champion Tracker</p>
-                        </div>
+            <!-- Leaderboard Tab -->
+            <section id="view-leaderboard" class="hidden space-y-6 text-left">
+                <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-3xl font-black text-slate-800 tracking-tight">Live Leaderboard</h2>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Ranked by Net To Par</p>
                     </div>
+                    <button onclick="window.location.reload()" class="bg-slate-100 p-3 rounded-xl text-slate-500 hover:text-sky-600 transition-colors shadow-sm border border-slate-200"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
                 </div>
-                
+
                 <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden text-left">
-                    <div class="grid grid-cols-12 gap-2 p-4 md:p-5 border-b border-slate-100 bg-slate-50/50 font-black text-[10px] md:text-xs text-slate-400 uppercase tracking-widest">
-                        <div class="col-span-2 md:col-span-1 text-center">Pos</div>
-                        <div class="col-span-4 md:col-span-5">Player</div>
-                        <div class="col-span-2 text-center">Thru</div>
-                        <div class="col-span-2 text-center">Gross</div>
-                        <div class="col-span-2 text-center text-sky-600">Net</div>
+                    <div class="grid grid-cols-12 gap-1 md:gap-2 p-3 md:p-5 border-b border-slate-100 bg-slate-50/50 font-black text-[8px] md:text-[10px] text-slate-400 uppercase tracking-widest">
+                        <div class="col-span-4">Player</div>
+                        <div class="col-span-2 text-center" title="Holes Played">Thru</div>
+                        <div class="col-span-2 text-center" title="Total Gross Score">Gross</div>
+                        <div class="col-span-2 text-center text-emerald-500" title="Net Pars or Better">Pars+</div>
+                        <div class="col-span-2 text-center text-sky-600" title="Net To Par">Net</div>
                     </div>
                     <div id="leaderboard-list" class="divide-y divide-slate-50">
-                        <div class="p-16 text-center text-slate-400 font-bold uppercase tracking-widest animate-pulse">Syncing Database...</div>
+                        <div class="p-16 text-center text-slate-400 font-bold uppercase tracking-widest animate-pulse">Calculating...</div>
                     </div>
                 </div>
             </section>
 
-            <!-- VIEW: PHOTOWALL -->
-            <section id="view-photowall" class="hidden space-y-8 text-left">
-                <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl border border-slate-200">
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                        <div class="text-center md:text-left">
-                            <h2 class="text-3xl font-black text-slate-800 tracking-tight">Tournament Photowall</h2>
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Upload and view the action</p>
-                        </div>
-                        
-                        <div class="w-full md:w-auto relative">
-                            <input type="file" id="photo-upload-input" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
-                            <button onclick="document.getElementById('photo-upload-input').click()" id="upload-photo-btn" class="w-full md:w-auto bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-black transition-all shadow-xl active-scale flex items-center justify-center gap-2 cursor-pointer">
-                                <i data-lucide="camera" class="w-5 h-5"></i> Add Photo
-                            </button>
-                        </div>
+            <!-- Photowall Tab -->
+            <section id="view-photowall" class="hidden space-y-6 text-left">
+                <div class="bg-slate-900 p-8 md:p-10 rounded-[3rem] shadow-xl text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-sky-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="z-10 text-center md:text-left">
+                        <h2 class="text-3xl font-black tracking-tight">Photowall</h2>
+                        <p class="text-[10px] font-bold text-sky-400 uppercase tracking-widest mt-2">Document the glory and the misery</p>
+                    </div>
+                    <div class="z-10 w-full md:w-auto relative">
+                        <input type="file" id="photo-upload-input" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+                        <label for="photo-upload-input" id="photo-upload-btn" class="w-full md:w-auto bg-sky-500 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-sky-400 transition-all shadow-xl active-scale flex items-center justify-center gap-2 cursor-pointer border border-sky-400/50">
+                            <i data-lucide="camera" class="w-5 h-5"></i> Upload Photo
+                        </label>
                     </div>
                 </div>
                 
-                <div id="photowall-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <!-- Photos render here -->
-                    <div class="col-span-full p-16 text-center text-slate-400 font-bold uppercase tracking-widest">Loading moments...</div>
+                <div id="photowall-grid" class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                    <!-- JS Populated -->
                 </div>
             </section>
 
@@ -382,74 +283,53 @@
     </div>
 
     <!-- Toast Container -->
-    <div id="toast-container" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[1000] flex flex-col gap-2 pointer-events-none w-full max-w-sm px-4"></div>
+    <div id="toast-container" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[1000] flex flex-col gap-2 pointer-events-none"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, initializeFirestore, persistentLocalCache, collection, doc, setDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-        // IMPORTANT: NEW DATABASE FOLDER FOR CRAISHEA
-        const DATABASE_FOLDER_NAME = 'craishea-2026';
-
-        // --- FIREBASE CONFIGURATION ---
-        let firebaseConfig;
-        try {
-            firebaseConfig = JSON.parse(__firebase_config);
-        } catch (e) {
-            firebaseConfig = {
-                apiKey: "AIzaSyD9VZJTpe-Rgz31kiaIzLDX2zutEcx5PgU",
-                authDomain: "havok205-9b090.firebaseapp.com",
-                projectId: "havok205-9b090",
-                storageBucket: "havok205-9b090.firebasestorage.app",
-                messagingSenderId: "89324820118",
-                appId: "1:89324820118:web:9c65b1401146c3d07b14b7"
-            };
-        }
-
+        // Firebase Config (havok205-9b090)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9VZJTpe-Rgz31kiaIzLDX2zutEcx5PgU",
+            authDomain: "havok205-9b090.firebaseapp.com",
+            projectId: "havok205-9b090",
+            storageBucket: "havok205-9b090.firebasestorage.app",
+            messagingSenderId: "89324820118",
+            appId: "1:89324820118:web:9c65b1401146c3d07b14b7"
+        };
+        
+        const activeAppId = 'craishea-2026'; // New isolated database folder
+        
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        
         let db;
         try { db = initializeFirestore(app, { localCache: persistentLocalCache() }); } 
         catch (e) { db = getFirestore(app); }
-        const storage = getStorage(app); 
+        const storage = getStorage(app);
 
-        // --- GLOBAL STATE ---
-        let currentUser = null;       
-        let rawPlayers = [];
-        let rawScores = [];
-        let rawPhotos = [];
+        // State
+        let currentUserData = null;
+        let allPlayers = [];
+        let allPhotos = [];
 
-        // --- HARDCODED GROUPINGS ---
+        // Corrected Golf Data
+        const holePars = {1:4, 2:3, 3:4, 4:4, 5:4, 6:5, 7:5, 8:3, 9:4, 10:4, 11:5, 12:3, 13:4, 14:5, 15:4, 16:4, 17:3, 18:4};
+        const strokeIndex = {1:9, 2:15, 3:3, 4:17, 5:11, 6:5, 7:1, 8:13, 9:7, 10:14, 11:4, 12:12, 13:18, 14:2, 15:6, 16:10, 17:16, 18:8};
+
         const groupings = [
-            { time: "11:00 AM", players: ["Alex Samson", "Lou Soriano", "Jordan Baker"] },
-            { time: "11:10 AM", players: ["Jacob Scriven", "Dave Ashwood", "Justin Cogan"] },
-            { time: "11:20 AM", players: ["Scott Watson", "Craig Flannagan", "Tyler Risdon", "Charlie McKinlay"] },
-            { time: "11:30 AM", players: ["Mike Flannagan", "Colin Moore", "Dave Spylo", "Rob Nichols"] },
-            { time: "11:40 AM", players: ["Luke Coles", "Jordan Horowitz", "Dave McCharles", "Sean McBurney"] },
-            { time: "11:50 AM", players: ["Brandon Benn", "Jesse Rabishaw", "Shea Burton", "Nick Coulson"] },
-            { time: "12:00 PM", players: ["Shane Quinnlan", "Jeff Ash", "Keith Palmer", "Corey Pellerin"] }
+            { time: "11:00", players: ["Alex Samson", "Lou Soriano", "Jordan Baker"] },
+            { time: "11:10", players: ["Jacob Scriven", "Dave Ashwood", "Justin Cogan", "Rob Nichols"] },
+            { time: "11:20", players: ["Scott Watson", "Craig Flannagan", "Tyler Risdon", "Charlie McKinlay"] },
+            { time: "11:30", players: ["Mike Flannagan", "Colin Moore", "Dave Spylo", "Bailey Farrell"] },
+            { time: "11:40", players: ["Luke Coles", "Jordan Horowitz", "Brandon Benn", "Sean McBurney"] },
+            { time: "11:50", players: ["Dave McCharles", "Jesse Rabishaw", "Shea Burton", "Nick Coulson"] },
+            { time: "12:00", players: ["Shane Quinnlan", "Jeff Ash", "Keith Palmer", "Corey Pellerin"] }
         ];
 
-        function renderGroupings() {
-            const container = document.getElementById('groupings-container');
-            container.innerHTML = groupings.map((g, i) => `
-                <div class="bg-slate-50 border border-slate-100 rounded-3xl p-6 relative overflow-hidden shadow-sm hover:border-indigo-200 transition-colors">
-                    <div class="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-xl rounded-tr-3xl shadow-sm">Group ${i+1}</div>
-                    <div class="flex items-center gap-2 mb-4 text-indigo-600 font-black text-lg tracking-tight">
-                        <i data-lucide="clock" class="w-5 h-5"></i> ${g.time}
-                    </div>
-                    <ul class="space-y-2">
-                        ${g.players.map(p => `<li class="font-bold text-slate-700 text-sm md:text-base border-b border-slate-200/50 pb-2 last:border-0 last:pb-0 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-slate-300"></div> ${p}</li>`).join('')}
-                    </ul>
-                </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        // --- UTILITY FUNCTIONS ---
+        // Helpers
         window.showToast = function(msg, isError = false) {
             const container = document.getElementById('toast-container');
             const t = document.createElement('div');
@@ -459,6 +339,320 @@
             setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
         }
 
+        window.showScreen = function(screenName) {
+            ['loading', 'phone', 'otp', 'register', 'app'].forEach(s => { 
+                const el = document.getElementById(`screen-${s}`); 
+                if (el) el.classList.add('hidden'); 
+            });
+            document.getElementById(`screen-${screenName}`).classList.remove('hidden');
+            if (screenName === 'app') lucide.createIcons();
+        }
+
+        window.switchView = function(viewName) {
+            const sections = ['wtf', 'groupings', 'scoring', 'leaderboard', 'photowall'];
+            sections.forEach(sec => { document.getElementById(`view-${sec}`).classList.toggle('hidden', viewName !== sec); });
+            sections.forEach(sec => {
+                const navEl = document.getElementById(`nav-${sec}`);
+                if (navEl) {
+                    if (viewName === sec) navEl.className = "flex-1 py-3 px-4 rounded-xl font-black text-[10px] md:text-xs uppercase transition-all bg-sky-500 text-white shadow-sm flex items-center gap-2 justify-center whitespace-nowrap";
+                    else navEl.className = "flex-1 py-3 px-4 rounded-xl font-black text-[10px] md:text-xs uppercase transition-all text-slate-300 opacity-60 flex items-center gap-2 justify-center whitespace-nowrap hover:opacity-100 hover:text-white";
+                }
+            });
+        };
+
+        // UI Generators
+        function buildGroupings() {
+            const container = document.getElementById('groupings-container');
+            container.innerHTML = groupings.map(g => `
+                <div class="bg-slate-50 border border-slate-100 rounded-3xl p-6 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 bg-sky-500 text-white font-black text-lg px-4 py-2 rounded-bl-2xl">${g.time}</div>
+                    <div class="pt-6 space-y-2">
+                        ${g.players.map((p, i) => `<div class="flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-400 shrink-0">${i+1}</span><span class="font-black text-slate-700 uppercase tracking-tight text-sm">${p}</span></div>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function buildScoreInputs() {
+            const f9 = document.getElementById('front-9-inputs');
+            const b9 = document.getElementById('back-9-inputs');
+            let f9Html = '', b9Html = '';
+            
+            for(let i=1; i<=18; i++) {
+                const html = `
+                    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3 text-center">
+                        <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Hole ${i} <span class="text-sky-500 ml-1">P${holePars[i]}</span></label>
+                        <input type="number" min="1" max="15" id="score-h${i}" class="w-full bg-white border border-slate-200 rounded-xl p-3 text-center font-black text-xl text-slate-800 outline-none focus:border-sky-500 transition-colors shadow-sm">
+                    </div>
+                `;
+                if (i <= 9) f9Html += html; else b9Html += html;
+            }
+            f9.innerHTML = f9Html; b9.innerHTML = b9Html;
+        }
+
+        // Auth Logic
+        onAuthStateChanged(auth, (firebaseUser) => {
+            if (firebaseUser && firebaseUser.phoneNumber) {
+                listenToDatabase(firebaseUser.phoneNumber);
+            } else {
+                showScreen('phone');
+            }
+        });
+
+        window.sendOTP = async function(e) {
+            e.preventDefault();
+            let phone = document.getElementById('phone-input').value.replace(/\D/g,'');
+            if (phone.length === 10) phone = '+1' + phone; else if (!phone.startsWith('+')) phone = '+' + phone;
+
+            const btn = document.getElementById('send-code-btn');
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin inline"></i> Sending...'; btn.disabled = true; lucide.createIcons();
+
+            try {
+                if (!window.recaptchaVerifier) window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
+                window.confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+                showScreen('otp');
+            } catch(err) {
+                console.error(err);
+                showToast(`Auth Failed: ${err.code}`, true);
+                btn.innerHTML = 'Send Code'; btn.disabled = false;
+            }
+        }
+
+        window.verifyOTP = async function(e) {
+            e.preventDefault();
+            const code = document.getElementById('otp-input').value;
+            const btn = document.getElementById('verify-code-btn');
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin inline"></i> Verifying...'; btn.disabled = true; lucide.createIcons();
+
+            try {
+                await window.confirmationResult.confirm(code);
+            } catch (err) {
+                showToast("Invalid code", true); btn.innerHTML = 'Verify'; btn.disabled = false;
+            }
+        }
+
+        window.registerUser = async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const hdcp = document.getElementById('reg-hdcp').value.trim();
+            
+            if (!name || !hdcp) return showToast("All fields required", true);
+
+            const btn = document.getElementById('register-btn');
+            btn.disabled = true; btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin inline"></i> Joining...`; lucide.createIcons();
+
+            try {
+                const docId = auth.currentUser.phoneNumber;
+                await setDoc(doc(db, 'artifacts', activeAppId, 'public', 'data', 'players', docId), {
+                    phone: docId,
+                    name: name,
+                    handicap: hdcp,
+                    timestamp: new Date().toISOString()
+                });
+                showToast("Registration successful!");
+            } catch(err) {
+                console.error(err);
+                showToast(`Reg Failed: ${err.code}`, true);
+                btn.disabled = false; btn.innerHTML = `Join Tournament`;
+            }
+        }
+
+        // Database
+        function listenToDatabase(phoneNumber) {
+            showScreen('loading');
+
+            const qP = collection(db, 'artifacts', activeAppId, 'public', 'data', 'players');
+            onSnapshot(qP, (snapshot) => {
+                allPlayers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const myProfile = allPlayers.find(p => p.id === phoneNumber);
+
+                if (myProfile) {
+                    currentUserData = myProfile;
+                    document.getElementById('scoring-as-name').innerText = currentUserData.name;
+                    loadMyScoresToUI();
+                    renderLeaderboard();
+                    showScreen('app');
+                } else {
+                    showScreen('register');
+                }
+            }, (error) => {
+                showToast(`DB Error: ${error.code}`, true);
+            });
+
+            const qPhotos = collection(db, 'artifacts', activeAppId, 'public', 'data', 'photos');
+            onSnapshot(qPhotos, (snapshot) => {
+                allPhotos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+                renderPhotowall();
+            });
+        }
+
+        function loadMyScoresToUI() {
+            if(!currentUserData || !currentUserData.scores) return;
+            for(let i=1; i<=18; i++) {
+                const el = document.getElementById(`score-h${i}`);
+                if (el && currentUserData.scores[i]) {
+                    el.value = currentUserData.scores[i];
+                }
+            }
+        }
+
+        window.saveScores = async function() {
+            if (!currentUserData) return;
+            const btn = document.getElementById('save-scores-btn');
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Saving...`; btn.disabled = true; lucide.createIcons();
+
+            let scores = {};
+            for(let i=1; i<=18; i++) {
+                const val = document.getElementById(`score-h${i}`).value;
+                if (val) scores[i] = parseInt(val);
+            }
+
+            try {
+                await setDoc(doc(db, 'artifacts', activeAppId, 'public', 'data', 'players', currentUserData.id), {
+                    scores: scores,
+                    lastUpdated: new Date().toISOString()
+                }, { merge: true });
+                showToast("Scorecard saved!");
+            } catch(err) {
+                showToast(`Save Error: ${err.code}`, true);
+            } finally {
+                btn.innerHTML = `<i data-lucide="save" class="w-5 h-5"></i> Save Scorecard`; btn.disabled = false; lucide.createIcons();
+            }
+        }
+
+        // Leaderboard Math
+        function parseHandicap(hStr) {
+            if(!hStr) return 0;
+            hStr = String(hStr).trim();
+            if(hStr.startsWith('+')) {
+                // e.g. "+2" means they GIVE strokes, so course handicap is -2
+                return -Math.abs(parseFloat(hStr.replace('+', '')));
+            }
+            return parseFloat(hStr);
+        }
+
+        function renderLeaderboard() {
+            const listEl = document.getElementById('leaderboard-list');
+            if (allPlayers.length === 0) return listEl.innerHTML = '<div class="p-16 text-center text-slate-400 font-bold uppercase tracking-widest animate-pulse">Waiting for players...</div>';
+
+            const lbData = allPlayers.map(p => {
+                let courseHdcp = Math.round(parseHandicap(p.handicap));
+                let currentNetToPar = 0;
+                let currentGross = 0;
+                let holesPlayed = 0;
+                let netParsOrBetter = 0;
+
+                for (let i = 1; i <= 18; i++) {
+                    const gross = p.scores?.[i];
+                    if (gross) {
+                        holesPlayed++;
+                        currentGross += parseInt(gross);
+
+                        // Stroke allocation logic
+                        let strokesForHole = 0;
+                        if (courseHdcp > 0) {
+                            strokesForHole = Math.floor(courseHdcp / 18) + (strokeIndex[i] <= (courseHdcp % 18) ? 1 : 0);
+                        } else if (courseHdcp < 0) {
+                            let plusCh = Math.abs(courseHdcp);
+                            // Plus handicaps ADD strokes to their score on the easiest holes (18, 17, etc)
+                            strokesForHole = -(Math.floor(plusCh / 18) + ((19 - strokeIndex[i]) <= (plusCh % 18) ? 1 : 0));
+                        }
+
+                        let netScore = parseInt(gross) - strokesForHole;
+                        currentNetToPar += (netScore - holePars[i]);
+                        
+                        // Check if Net Score is a Par or better
+                        if (netScore <= holePars[i]) {
+                            netParsOrBetter++;
+                        }
+                    }
+                }
+
+                return {
+                    name: p.name,
+                    hdcpDisplay: p.handicap,
+                    thru: holesPlayed === 18 ? 'F' : holesPlayed,
+                    gross: holesPlayed > 0 ? currentGross : '-',
+                    netParsOrBetterDisplay: holesPlayed > 0 ? netParsOrBetter : '-',
+                    netToPar: holesPlayed > 0 ? currentNetToPar : 999, // 999 sorts to bottom if no score
+                    netToParDisplay: holesPlayed === 0 ? '-' : (currentNetToPar === 0 ? 'E' : (currentNetToPar > 0 ? `+${currentNetToPar}` : currentNetToPar))
+                };
+            });
+
+            // Sort by Net To Par ascending
+            lbData.sort((a, b) => a.netToPar - b.netToPar || a.name.localeCompare(b.name));
+
+            listEl.innerHTML = lbData.map((p, i) => `
+                <div class="grid grid-cols-12 gap-1 md:gap-2 items-center p-3 md:p-5 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
+                    <div class="col-span-4 flex items-center gap-2 md:gap-3 overflow-hidden">
+                        <span class="w-5 h-5 rounded flex items-center justify-center font-black text-[9px] shrink-0 bg-slate-100 text-slate-400">${i + 1}</span>
+                        <div class="flex flex-col truncate">
+                            <span class="font-bold text-slate-800 uppercase tracking-tight text-[10px] md:text-sm truncate">${p.name}</span>
+                            <span class="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">HDCP: ${p.hdcpDisplay}</span>
+                        </div>
+                    </div>
+                    <div class="col-span-2 text-center font-bold text-slate-500 text-xs md:text-sm">${p.thru}</div>
+                    <div class="col-span-2 text-center font-black text-slate-700 text-xs md:text-sm">${p.gross}</div>
+                    <div class="col-span-2 text-center font-black text-emerald-600 text-xs md:text-sm">${p.netParsOrBetterDisplay}</div>
+                    <div class="col-span-2 text-center font-black text-base md:text-lg ${p.netToPar < 0 ? 'text-rose-600' : (p.netToPar === 0 ? 'text-emerald-600' : 'text-slate-700')}">${p.netToParDisplay}</div>
+                </div>
+            `).join('');
+        }
+
+        // Photowall Logic
+        window.handlePhotoUpload = async function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+
+            const btn = document.getElementById('photo-upload-btn');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Uploading...`; btn.style.pointerEvents = 'none'; lucide.createIcons();
+
+            try {
+                // Compress
+                const compressedBlob = await compressImage(file, 1200, 1200, 0.7);
+                const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+                
+                // Upload to Storage
+                const storageRef = ref(storage, `artifacts/${activeAppId}/public/data/photos/${Date.now()}_${safeName}`);
+                await uploadBytes(storageRef, compressedBlob);
+                const url = await getDownloadURL(storageRef);
+
+                // Add to Firestore using strict secure path and addDoc
+                await addDoc(collection(db, 'artifacts', activeAppId, 'public', 'data', 'photos'), {
+                    url: url,
+                    uploadedBy: currentUserData ? currentUserData.name : 'Unknown',
+                    timestamp: new Date().toISOString()
+                });
+
+                showToast("Photo uploaded successfully!");
+            } catch(err) {
+                console.error(err);
+                showToast(`Upload failed: ${err.code}`, true);
+            } finally {
+                btn.innerHTML = originalContent; btn.style.pointerEvents = 'auto'; lucide.createIcons();
+                e.target.value = ''; // Reset input
+            }
+        }
+
+        function renderPhotowall() {
+            const grid = document.getElementById('photowall-grid');
+            if (allPhotos.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 font-bold uppercase tracking-widest border-2 border-dashed border-slate-200 rounded-3xl mt-4">No photos yet. Be the first!</div>`;
+                return;
+            }
+
+            grid.innerHTML = allPhotos.map(p => `
+                <div class="relative group aspect-square rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm">
+                    <img src="${p.url}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3 text-left">
+                        <span class="text-white text-[10px] font-black uppercase tracking-widest truncate">📸 ${p.uploadedBy}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Image Compression Helper
         const compressImage = async (file, maxWidth = 1200, maxHeight = 1200, quality = 0.7) => {
             return new Promise((resolve, reject) => {
                 const img = new Image(); img.src = URL.createObjectURL(file);
@@ -475,378 +669,20 @@
             });
         };
 
+        // Boot
+        lucide.createIcons();
+        buildGroupings();
+        buildScoreInputs();
+        
+        // Timeout loader fallback
         window.addEventListener('load', () => {
             setTimeout(() => {
-                const splash = document.getElementById('screen-splash');
-                if (splash) { splash.style.opacity = '0'; setTimeout(() => splash.classList.add('hidden'), 1000); }
-            }, 2500); 
-            renderGroupings();
+                const loader = document.getElementById('screen-loading');
+                if (loader && !loader.classList.contains('hidden')) {
+                    // Only hide if we haven't already transitioned to another screen
+                }
+            }, 3000); 
         });
-
-        lucide.createIcons();
-
-        // --- FIREBASE AUTH HANDLERS ---
-        onAuthStateChanged(auth, (firebaseUser) => {
-            if (firebaseUser && firebaseUser.phoneNumber) listenToDatabase(firebaseUser.phoneNumber);
-            else showScreen('phone');
-        });
-
-        window.sendOTP = async function(e) {
-            e.preventDefault();
-            let phone = document.getElementById('phone-input').value.replace(/\D/g,'');
-            if (phone.length === 10) phone = '+1' + phone; else if (!phone.startsWith('+')) phone = '+' + phone;
-
-            const btn = document.getElementById('send-code-btn');
-            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin inline"></i> Sending...'; lucide.createIcons(); btn.disabled = true;
-
-            try {
-                if (!window.recaptchaVerifier) window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
-                window.confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
-                showScreen('otp');
-            } catch(err) {
-                console.error(err); 
-                // Show the actual Firebase error message in the toast to make debugging easier
-                showToast(err.message || "Error sending code.", true);
-                btn.innerHTML = 'Send Code'; btn.disabled = false;
-            }
-        }
-
-        window.verifyOTP = async function(e) {
-            e.preventDefault();
-            const code = document.getElementById('otp-input').value;
-            const btn = document.getElementById('verify-code-btn');
-            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin inline"></i> Verifying...'; lucide.createIcons(); btn.disabled = true;
-
-            try {
-                await window.confirmationResult.confirm(code);
-                document.getElementById('otp-input').value = "";
-            } catch (err) {
-                showToast("Invalid code", true); btn.innerHTML = 'Verify Code'; btn.disabled = false;
-            }
-        }
-
-        window.logout = function() { signOut(auth).then(() => { currentUser = null; window.location.reload(); }); };
-
-        window.registerProfile = async function(e) {
-            e.preventDefault();
-            const nameInput = document.getElementById('reg-name').value.trim();
-            const handicapInput = document.getElementById('reg-handicap').value.trim();
-            if(!nameInput || !handicapInput) return;
-
-            const btn = document.getElementById('register-btn');
-            btn.disabled = true; btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin inline"></i> Registering...'; lucide.createIcons();
-
-            try {
-                const uid = auth.currentUser.uid;
-                await setDoc(doc(db, 'artifacts', DATABASE_FOLDER_NAME, 'public', 'data', 'players', uid), { 
-                    name: nameInput,
-                    handicap: handicapInput,
-                    phone: auth.currentUser.phoneNumber,
-                    timestamp: new Date().toISOString()
-                });
-                showToast("Welcome to CraiShea!");
-            } catch (err) {
-                console.error(err);
-                showToast("Failed to register.", true);
-                btn.disabled = false; btn.innerHTML = 'Register';
-            }
-        };
-
-        // --- FIREBASE DATABASE SYNC ---
-        function listenToDatabase(phoneNumber) {
-            showScreen('loading');
-
-            // 1. Players
-            const qP = collection(db, 'artifacts', DATABASE_FOLDER_NAME, 'public', 'data', 'players');
-            onSnapshot(qP, (snapshot) => {
-                try {
-                    rawPlayers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-                    const myProfile = rawPlayers.find(p => p.phone === phoneNumber);
-
-                    if (myProfile) {
-                        currentUser = myProfile;
-                        document.getElementById('scoring-current-user').innerText = currentUser.name;
-                        loadPlayerScorecard(currentUser.id);
-                        showScreen('app');
-                        if(document.getElementById('view-wtf').classList.contains('hidden') && document.getElementById('view-groupings').classList.contains('hidden') && document.getElementById('view-scoring').classList.contains('hidden') && document.getElementById('view-leaderboard').classList.contains('hidden') && document.getElementById('view-photowall').classList.contains('hidden')) {
-                            switchView('wtf');
-                        }
-                    } else {
-                        showScreen('register');
-                    }
-                } catch(err) {
-                    console.error("Player load error:", err);
-                    document.getElementById('screen-loading').innerHTML = `<div class="text-rose-500 font-bold p-6 text-center">Data Error. See Console.</div>`;
-                }
-            }, (error) => {
-                console.error("Firebase Rules Error:", error);
-                document.getElementById('screen-loading').innerHTML = `<div class="text-rose-600 font-black p-8 text-center uppercase tracking-widest bg-rose-50 rounded-3xl m-6 border-2 border-rose-200"><i data-lucide="shield-alert" class="w-10 h-10 mx-auto mb-3"></i>Permission Denied<br><span class="text-xs text-slate-500 font-bold mt-2 block normal-case tracking-normal">Update your Firestore Rules to allow craishea-2026</span></div>`;
-                lucide.createIcons();
-            });
-
-            // 2. Scores
-            const qS = collection(db, 'artifacts', DATABASE_FOLDER_NAME, 'public', 'data', 'scores');
-            onSnapshot(qS, (snapshot) => {
-                rawScores = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderLeaderboard();
-                
-                // Refresh scorecard inputs for current user
-                if(currentUser) loadPlayerScorecard(currentUser.id);
-            }, (error) => console.error("Scores error:", error));
-
-            // 3. Photos
-            const qPh = collection(db, 'artifacts', DATABASE_FOLDER_NAME, 'public', 'data', 'photos');
-            onSnapshot(qPh, (snapshot) => {
-                rawPhotos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                renderPhotowall();
-            }, (error) => console.error("Photos error:", error));
-        }
-
-        // --- APP NAVIGATION LOGIC ---
-        window.showScreen = function(screenName) {
-            ['splash', 'loading', 'phone', 'otp', 'register', 'app'].forEach(s => { const el = document.getElementById(`screen-${s}`); if (el) el.classList.add('hidden'); });
-            document.getElementById(`screen-${screenName}`).classList.remove('hidden');
-            document.body.classList.toggle('overflow-hidden', screenName !== 'app');
-        }
-
-        window.switchView = function(viewName) {
-            const sections = ['wtf', 'groupings', 'scoring', 'leaderboard', 'photowall'];
-            sections.forEach(sec => { document.getElementById(`view-${sec}`).classList.toggle('hidden', viewName !== sec); });
-            sections.forEach(sec => {
-                const navEl = document.getElementById(`nav-${sec}`);
-                if (navEl) {
-                    if (viewName === sec) navEl.className = "flex-1 py-3 px-4 rounded-xl font-black text-[10px] md:text-xs uppercase transition-all bg-white text-slate-900 shadow-sm whitespace-nowrap";
-                    else navEl.className = "flex-1 py-3 px-4 rounded-xl font-black text-[10px] md:text-xs uppercase transition-all text-slate-300 hover:text-white whitespace-nowrap";
-                }
-            });
-            window.scrollTo({ top: 0 });
-        };
-
-        // --- LIVE SCORING LOGIC ---
-        window.loadPlayerScorecard = function(playerId) {
-            const form = document.getElementById('scorecard-form');
-            const emptyState = document.getElementById('scorecard-empty');
-            
-            if(!playerId) {
-                form.classList.add('hidden');
-                emptyState.classList.remove('hidden');
-                return;
-            }
-
-            form.classList.remove('hidden');
-            emptyState.classList.add('hidden');
-
-            const playerScoreDoc = rawScores.find(s => s.id === playerId);
-            
-            // Populate inputs 1-18
-            for(let i=1; i<=18; i++) {
-                const input = document.getElementById(`hole-${i}`);
-                if(playerScoreDoc && playerScoreDoc.holes && playerScoreDoc.holes[i]) {
-                    input.value = playerScoreDoc.holes[i];
-                } else {
-                    input.value = '';
-                }
-            }
-        };
-
-        window.saveScorecard = async function(e) {
-            e.preventDefault();
-            if(!currentUser) return;
-            const playerId = currentUser.id;
-
-            const playerObj = rawPlayers.find(p => p.id === playerId);
-            if(!playerObj) return;
-
-            const btn = document.getElementById('save-score-btn');
-            btn.disabled = true; btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Saving...`; lucide.createIcons();
-
-            try {
-                let holes = {};
-                let totalGross = 0;
-                let thruCount = 0;
-
-                for(let i=1; i<=18; i++) {
-                    const val = document.getElementById(`hole-${i}`).value;
-                    if(val && val.trim() !== '') {
-                        const num = parseInt(val, 10);
-                        holes[i] = num;
-                        totalGross += num;
-                        thruCount++;
-                    }
-                }
-
-                await setDoc(doc(db, 'artifacts', DATABASE_FOLDER_NAME, 'public', 'data', 'scores', playerId), {
-                    playerName: playerObj.name,
-                    holes: holes,
-                    total: totalGross,
-                    thru: thruCount,
-                    lastUpdated: new Date().toISOString()
-                });
-
-                showToast("Scorecard Saved!");
-                switchView('leaderboard');
-            } catch(err) {
-                console.error(err);
-                showToast("Failed to save.", true);
-            } finally {
-                btn.disabled = false; btn.innerHTML = `<i data-lucide="save" class="w-5 h-5"></i> Save Scorecard`; lucide.createIcons();
-            }
-        };
-
-        // --- LEADERBOARD PROCESSING ---
-        function renderLeaderboard() {
-            const listEl = document.getElementById('leaderboard-list');
-            if (rawScores.length === 0 && rawPlayers.length === 0) {
-                listEl.innerHTML = '<div class="p-16 text-center text-slate-400 font-bold uppercase tracking-widest">No scores recorded yet.</div>';
-                return;
-            }
-
-            const strokeIndex = {1:9, 2:15, 3:3, 4:17, 5:11, 6:5, 7:1, 8:13, 9:7, 10:14, 11:4, 12:2, 13:18, 14:2, 15:6, 16:10, 17:16, 18:8};
-            const holePars = {1:4, 2:3, 3:4, 4:4, 5:4, 6:5, 7:5, 8:3, 9:4, 10:4, 11:5, 12:3, 13:4, 14:5, 15:4, 16:4, 17:3, 18:4};
-
-            const lbData = rawPlayers.map(p => {
-                const s = rawScores.find(scoreDoc => scoreDoc.id === p.id);
-                let totalGross = 0;
-                let totalNet = 0;
-                let totalParPlayed = 0;
-                let thru = 0;
-                
-                if (s && s.holes) {
-                    const hcStr = p.handicap ? p.handicap.toString().trim() : '0';
-                    const isPlus = hcStr.startsWith('+');
-                    let hcVal = Math.round(parseFloat(hcStr.replace('+', '')) || 0);
-                    
-                    for(let i=1; i<=18; i++) {
-                        if(s.holes[i]) {
-                            totalGross += s.holes[i];
-                            thru++;
-                            totalParPlayed += holePars[i];
-                            
-                            let netScore = s.holes[i];
-                            let si = strokeIndex[i];
-                            
-                            if (isPlus) {
-                                let baseGive = Math.floor(hcVal / 18);
-                                let remGive = hcVal % 18;
-                                let strokesGiven = baseGive + (si >= (19 - remGive) ? 1 : 0);
-                                netScore += strokesGiven;
-                            } else {
-                                let baseGet = Math.floor(hcVal / 18);
-                                let remGet = hcVal % 18;
-                                let strokesGot = baseGet + (si <= remGet ? 1 : 0);
-                                netScore -= strokesGot;
-                            }
-                            totalNet += netScore;
-                        }
-                    }
-                }
-
-                let netToPar = totalNet - totalParPlayed;
-                let displayNetToPar = netToPar > 0 ? '+' + netToPar : (netToPar === 0 ? 'E' : netToPar);
-
-                return {
-                    name: p.name,
-                    handicap: p.handicap || '0',
-                    totalGross: totalGross,
-                    totalNet: totalNet,
-                    netToPar: netToPar,
-                    displayNetToPar: displayNetToPar,
-                    thru: thru,
-                    hasPlayed: thru > 0
-                };
-            });
-
-            // Sort by Net to Par score first, so in-progress comparisons are fair
-            lbData.sort((a, b) => {
-                if (a.hasPlayed && !b.hasPlayed) return -1;
-                if (!a.hasPlayed && b.hasPlayed) return 1;
-                if (!a.hasPlayed && !b.hasPlayed) return a.name.localeCompare(b.name);
-                
-                if (a.netToPar === b.netToPar) return b.thru - a.thru; 
-                return a.netToPar - b.netToPar;
-            });
-
-            listEl.innerHTML = lbData.map((p, i) => {
-                const isLeader = i === 0 && p.hasPlayed;
-                const posBadge = isLeader ? '<i data-lucide="crown" class="w-4 h-4 text-white"></i>' : (p.hasPlayed ? i + 1 : '-');
-                const badgeClass = isLeader ? 'bg-amber-400 text-white shadow-md' : 'bg-slate-100 text-slate-400';
-                
-                let scoreColor = 'text-slate-800'; // Over Par
-                if (p.netToPar < 0) scoreColor = 'text-rose-600'; // Under Par
-                else if (p.netToPar === 0) scoreColor = 'text-emerald-600'; // Even Par
-                
-                return `
-                <div class="grid grid-cols-12 gap-2 items-center p-3 md:p-4 hover:bg-slate-50 transition-colors border-b border-slate-50">
-                    <div class="col-span-2 md:col-span-1 flex justify-center">
-                        <span class="w-6 h-6 md:w-8 md:h-8 rounded-lg flex items-center justify-center font-black text-[10px] md:text-xs shrink-0 ${badgeClass}">${posBadge}</span>
-                    </div>
-                    <div class="col-span-4 md:col-span-5">
-                        <span class="font-bold text-slate-800 tracking-tight truncate text-sm md:text-base block leading-tight">${p.name}</span>
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 block">HDCP: ${p.handicap}</span>
-                    </div>
-                    <div class="col-span-2 text-center font-bold text-slate-500 text-xs md:text-base">${p.thru === 18 ? 'F' : p.thru}</div>
-                    <div class="col-span-2 text-center font-black text-slate-400 text-sm md:text-lg">${p.hasPlayed ? p.totalGross : '-'}</div>
-                    <div class="col-span-2 text-center font-black ${p.hasPlayed ? scoreColor : 'text-slate-300'} text-sm md:text-lg">${p.hasPlayed ? p.displayNetToPar : '-'}</div>
-                </div>
-            `}).join('');
-
-            lucide.createIcons();
-        }
-
-        // --- PHOTOWALL UPLOAD LOGIC ---
-        window.handlePhotoUpload = async function(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-
-            const btn = document.getElementById('upload-photo-btn');
-            const originalHtml = btn.innerHTML;
-            btn.disabled = true; btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin inline"></i> Uploading...`; lucide.createIcons();
-
-            try {
-                const compressedBlob = await compressImage(file, 1200, 1200, 0.7);
-                const safeFileName = file.name.replace(/[^a-zA-Z0-9]/g, '_') + '.jpg';
-                
-                // CRITICAL: Ensure Firebase Storage path matches strict artifact rules to prevent permission denials
-                const storageRef = ref(storage, `artifacts/${DATABASE_FOLDER_NAME}/public/data/photos/${Date.now()}_${safeFileName}`);
-                
-                await uploadBytes(storageRef, compressedBlob);
-                const url = await getDownloadURL(storageRef);
-
-                await addDoc(collection(db, 'artifacts', DATABASE_FOLDER_NAME, 'public', 'data', 'photos'), {
-                    url: url,
-                    uploadedBy: currentUser.name,
-                    timestamp: new Date().toISOString()
-                });
-
-                showToast("Photo Added!");
-            } catch(err) {
-                console.error("Photo Upload Error:", err);
-                // Show the exact error message on screen to help with debugging
-                showToast("Upload failed: " + (err.message || "Unknown error"), true);
-            } finally {
-                btn.disabled = false; btn.innerHTML = originalHtml;
-                e.target.value = ''; // clear input
-                lucide.createIcons(); // Re-initialize the camera icon
-            }
-        };
-
-        function renderPhotowall() {
-            const grid = document.getElementById('photowall-grid');
-            if (rawPhotos.length === 0) {
-                grid.innerHTML = `<div class="col-span-full p-16 text-center text-slate-400 font-bold uppercase tracking-widest border-2 border-dashed border-slate-200 rounded-3xl mt-4">No photos yet. Be the first!</div>`;
-                return;
-            }
-
-            grid.innerHTML = rawPhotos.map(p => `
-                <div class="relative group aspect-square rounded-2xl overflow-hidden bg-slate-100 shadow-sm border border-slate-200">
-                    <img src="${p.url}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy">
-                    <div class="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-slate-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                        <p class="text-[9px] font-bold text-white uppercase tracking-widest">Added by</p>
-                        <p class="text-sm font-black text-sky-400 truncate">${p.uploadedBy}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
 
     </script>
 </body>
