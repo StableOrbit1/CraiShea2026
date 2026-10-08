@@ -13,7 +13,7 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        /* Loading Animation */
+        /* Loading & Splash Animations */
         @keyframes pulse-ring {
             0% { transform: scale(0.8); opacity: 0.5; }
             100% { transform: scale(1.3); opacity: 0; }
@@ -22,11 +22,34 @@
             content: ''; position: absolute; left: 0; top: 0; width: 100%; height: 100%;
             background-color: #0ea5e9; border-radius: 50%; z-index: -1; animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
         }
+        @keyframes kenburns {
+            0% { transform: scale(1.2); opacity: 0; filter: grayscale(100%); }
+            20% { opacity: 0.6; filter: grayscale(50%); }
+            100% { transform: scale(1); opacity: 0.8; filter: grayscale(0%); }
+        }
+        @keyframes fadeup {
+            0% { transform: translateY(30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans min-h-screen pb-24 selection:bg-sky-200">
 
-    <div id="screen-loading" class="fixed inset-0 z-[200] bg-slate-900 flex flex-col items-center justify-center transition-opacity duration-300">
+    <!-- Cinematic Intro Splash Screen -->
+    <div id="screen-splash" class="fixed inset-0 z-[500] bg-slate-900 flex flex-col items-center justify-center overflow-hidden transition-opacity duration-1000">
+        <img src="image_4.png" class="absolute inset-0 w-full h-full object-cover opacity-40 animate-[kenburns_5s_ease-out_forwards]" alt="Craig and Shea">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+        <div class="relative z-10 text-center animate-[fadeup_2s_ease-out_forwards]">
+            <p class="text-sky-500 font-black tracking-[0.3em] uppercase text-xs mb-4">3rd Annual</p>
+            <h1 class="text-5xl font-black text-white tracking-tighter uppercase drop-shadow-2xl flex items-center gap-2 justify-center">
+                <i data-lucide="flag-triangle-right" class="w-10 h-10 text-sky-500"></i> CRAI<span class="text-sky-500">SHEA</span>
+            </h1>
+            <p class="text-slate-400 font-bold tracking-widest uppercase text-[10px] mt-6">October 17, 2026</p>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="screen-loading" class="fixed inset-0 z-[200] bg-slate-900 flex flex-col items-center justify-center transition-opacity duration-300 hidden">
         <div class="relative w-16 h-16 flex items-center justify-center loader-ring mb-4">
             <div class="w-12 h-12 bg-sky-500 rounded-full flex items-center justify-center text-white">
                 <i data-lucide="flag" class="w-6 h-6"></i>
@@ -35,6 +58,7 @@
         <p id="loading-text" class="text-sky-500 font-bold tracking-widest uppercase text-xs">Syncing Tournament...</p>
     </div>
 
+    <!-- Phone Auth Screen -->
     <div id="screen-phone" class="fixed inset-0 z-[100] bg-slate-900 flex flex-col items-center justify-center p-6 text-center hidden">
         <div class="bg-white p-10 rounded-[3rem] shadow-2xl max-w-sm w-full space-y-8">
             <div class="w-20 h-20 bg-sky-100 text-sky-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
@@ -53,6 +77,7 @@
         </div>
     </div>
 
+    <!-- OTP Auth Screen -->
     <div id="screen-otp" class="fixed inset-0 z-[95] bg-slate-900 flex flex-col items-center justify-center p-6 text-center hidden">
         <div class="bg-white p-10 rounded-[3rem] shadow-2xl max-w-sm w-full space-y-8">
             <div class="w-20 h-20 bg-sky-100 text-sky-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
@@ -70,6 +95,7 @@
         </div>
     </div>
 
+    <!-- Registration Screen -->
     <div id="screen-register" class="fixed inset-0 z-[90] bg-slate-900 flex flex-col items-center justify-center p-6 text-center hidden overflow-y-auto">
         <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-2xl max-w-md w-full space-y-6 my-auto">
             <div class="w-20 h-20 bg-sky-100 text-sky-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
@@ -101,6 +127,7 @@
         </div>
     </div>
 
+    <!-- Admin Screen -->
     <div id="screen-admin" class="fixed inset-0 z-[300] bg-slate-900 overflow-y-auto hidden">
         <div class="max-w-md mx-auto bg-white min-h-screen p-6">
             <div class="flex justify-between items-center mb-8">
@@ -111,12 +138,15 @@
                 Check the box when a player pays their $50 entry fee.
             </div>
             <div class="space-y-3" id="admin-players-list">
-                </div>
+                <!-- JS Populated -->
+            </div>
         </div>
     </div>
 
+    <!-- Main Application -->
     <div id="screen-app" class="hidden">
         
+        <!-- Header & Nav -->
         <header class="bg-slate-900 text-white p-4 md:p-6 shadow-2xl sticky top-0 z-50">
             <div class="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="flex flex-col items-center md:items-start">
@@ -146,6 +176,7 @@
 
         <main class="max-w-4xl mx-auto p-4 md:p-8 space-y-12">
             
+            <!-- WTF Tab -->
             <section id="view-wtf" class="space-y-8 text-left animate-fade-in">
                 <div class="bg-white p-8 md:p-12 rounded-[3rem] shadow-xl border border-slate-200">
                     <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
@@ -210,15 +241,18 @@
                 </div>
             </section>
 
+            <!-- Groupings Tab -->
             <section id="view-groupings" class="hidden space-y-6 text-left">
                 <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl border border-slate-200">
                     <h2 class="text-3xl font-black text-slate-800 tracking-tight">Tee Times</h2>
                     <p class="text-[10px] font-black text-sky-600 uppercase tracking-widest mt-1">Saturday, October 17th</p>
                 </div>
                 <div id="groupings-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    </div>
+                    <!-- Javascript Populated -->
+                </div>
             </section>
 
+            <!-- Live Scoring Tab -->
             <section id="view-scoring" class="hidden space-y-6 text-left">
                 <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
@@ -230,26 +264,31 @@
                 <div class="bg-white rounded-[3rem] shadow-xl border border-slate-200 p-6 md:p-8">
                     
                     <div id="scoring-sub-nav" class="flex gap-2 overflow-x-auto custom-scrollbar pb-2 mb-6 border-b border-slate-100">
-                        </div>
+                        <!-- JS populated -->
+                    </div>
 
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-lg font-black text-slate-800 tracking-tight uppercase">Front 9</h3>
                     </div>
                     <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-9 gap-3" id="front-9-inputs">
-                        </div>
+                        <!-- JS populated -->
+                    </div>
 
                     <div class="flex items-center justify-between mb-6 mt-10 border-t border-slate-100 pt-8">
                         <h3 class="text-lg font-black text-slate-800 tracking-tight uppercase">Back 9</h3>
                     </div>
                     <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-9 gap-3" id="back-9-inputs">
-                        </div>
+                        <!-- JS populated -->
+                    </div>
 
-                    <button onclick="saveScores()" id="save-scores-btn" class="w-full bg-sky-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-sky-700 shadow-xl transition-all active-scale mt-10 flex items-center justify-center gap-2">
-                        <i data-lucide="save" class="w-5 h-5"></i> Save Scorecard
-                    </button>
+                    <!-- Auto-Save Status Indicator -->
+                    <div id="save-status" class="w-full bg-slate-50 text-slate-500 py-4 rounded-2xl font-bold uppercase tracking-widest border border-slate-200 flex items-center justify-center gap-2 mt-10 text-xs shadow-inner">
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i> Auto-saving active
+                    </div>
                 </div>
             </section>
 
+            <!-- Leaderboard Tab -->
             <section id="view-leaderboard" class="hidden space-y-6 text-left">
                 <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
@@ -273,6 +312,7 @@
                 </div>
             </section>
 
+            <!-- Photowall Tab -->
             <section id="view-photowall" class="hidden space-y-6 text-left">
                 <div class="bg-slate-900 p-8 md:p-10 rounded-[3rem] shadow-xl text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
                     <div class="absolute -right-20 -top-20 w-64 h-64 bg-sky-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -289,12 +329,14 @@
                 </div>
                 
                 <div id="photowall-grid" class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-                    </div>
+                    <!-- JS Populated -->
+                </div>
             </section>
 
         </main>
     </div>
 
+    <!-- Toast Container -->
     <div id="toast-container" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-[1000] flex flex-col gap-2 pointer-events-none w-[90%] max-w-sm"></div>
 
     <script type="module">
@@ -340,7 +382,7 @@
             { time: "11:30", players: ["Mike Flannagan", "Colin Moore", "Dave Spylo", "Bailey Farrell"] },
             { time: "11:40", players: ["Luke Coles", "Jordan Horowitz", "Brandon Benn", "Sean McBurney"] },
             { time: "11:50", players: ["Dave McCharles", "Jesse Rabishaw", "Shea Burton", "Nick Coulson"] },
-            { time: "12:00", players: ["Shane Quinlan", "Jeff Ash", "Keith Palmer", "Corey Pellerin"] }
+            { time: "12:00", players: ["Shane Quinnlan", "Jeff Ash", "Keith Palmer", "Corey Pellerin"] }
         ];
 
         // Helpers
@@ -399,6 +441,23 @@
             } catch(e) { showToast("Error updating database", true); }
         }
 
+        // Auto-Save Engine
+        let autoSaveTimeout = null;
+
+        window.triggerAutoSave = function() {
+            const statusEl = document.getElementById('save-status');
+            if(statusEl) {
+                statusEl.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin text-sky-500"></i> Saving...`;
+                lucide.createIcons();
+            }
+
+            if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
+            
+            autoSaveTimeout = setTimeout(() => {
+                saveScores();
+            }, 1000);
+        }
+
         // UI Generators
         function buildGroupings() {
             const container = document.getElementById('groupings-container');
@@ -437,7 +496,7 @@
                 const html = `
                     <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3 text-center">
                         <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Hole ${i} <span class="text-sky-500 ml-1">P${holePars[i]}</span></label>
-                        <input type="number" min="1" max="15" id="score-h${i}" class="w-full bg-white border border-slate-200 rounded-xl p-3 text-center font-black text-xl text-slate-800 outline-none focus:border-sky-500 transition-colors shadow-sm">
+                        <input type="number" min="1" max="15" id="score-h${i}" oninput="triggerAutoSave()" class="w-full bg-white border border-slate-200 rounded-xl p-3 text-center font-black text-xl text-slate-800 outline-none focus:border-sky-500 transition-colors shadow-sm">
                     </div>
                 `;
                 if (i <= 9) f9Html += html; else b9Html += html;
@@ -544,7 +603,10 @@
 
         // Database
         function listenToDatabase(phoneNumber) {
-            showScreen('loading');
+            const splash = document.getElementById('screen-splash');
+            if (splash && splash.classList.contains('hidden')) {
+                showScreen('loading');
+            }
 
             const qP = collection(db, 'artifacts', activeAppId, 'public', 'data', 'players');
             onSnapshot(qP, (snapshot) => {
@@ -611,9 +673,21 @@
         }
 
         window.switchScoringPlayer = function(playerId) {
+            if (autoSaveTimeout) { 
+                clearTimeout(autoSaveTimeout); 
+                autoSaveTimeout = null;
+                saveScores(); 
+            }
+            
             activeScoringPlayerId = playerId;
             renderScoringSubNav();
             loadScoresForPlayer(playerId);
+            
+            const statusEl = document.getElementById('save-status');
+            if(statusEl) {
+                statusEl.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i> Auto-saving active`;
+                lucide.createIcons();
+            }
         }
 
         function loadScoresForPlayer(playerId) {
@@ -635,8 +709,6 @@
 
         window.saveScores = async function() {
             if (!activeScoringPlayerId) return;
-            const btn = document.getElementById('save-scores-btn');
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Saving...`; btn.disabled = true; lucide.createIcons();
 
             let scores = {};
             for(let i=1; i<=18; i++) {
@@ -649,11 +721,19 @@
                     scores: scores,
                     lastUpdated: new Date().toISOString()
                 }, { merge: true });
-                showToast("Scorecard saved!");
+                
+                const statusEl = document.getElementById('save-status');
+                if(statusEl) {
+                    statusEl.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i> All changes saved`;
+                    lucide.createIcons();
+                }
             } catch(err) {
+                const statusEl = document.getElementById('save-status');
+                if(statusEl) {
+                    statusEl.innerHTML = `<i data-lucide="alert-circle" class="w-5 h-5 text-rose-500"></i> Save failed`;
+                    lucide.createIcons();
+                }
                 showToast(`Save Error: ${err.message}`, true);
-            } finally {
-                btn.innerHTML = `<i data-lucide="save" class="w-5 h-5"></i> Save Scorecard`; btn.disabled = false; lucide.createIcons();
             }
         }
 
@@ -842,6 +922,17 @@
                 };
             });
         };
+
+        // Splash Screen Logic
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('screen-splash');
+                if (splash) {
+                    splash.style.opacity = '0';
+                    setTimeout(() => splash.classList.add('hidden'), 1000);
+                }
+            }, 3500); 
+        });
 
         lucide.createIcons();
         buildGroupings();
