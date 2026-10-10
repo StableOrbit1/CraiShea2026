@@ -127,6 +127,36 @@
         </div>
     </div>
 
+    <!-- Edit Handicap Modal -->
+    <div id="modal-hdcp" class="fixed inset-0 z-[400] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center hidden p-6 transition-opacity duration-300">
+        <div class="bg-white rounded-[2.5rem] p-8 max-w-sm w-full text-center space-y-6 shadow-2xl scale-0 transition-transform duration-300" id="modal-hdcp-content">
+            <div class="w-16 h-16 bg-sky-100 text-sky-600 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+                <i data-lucide="edit-3" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <h3 class="text-2xl font-black text-slate-800 tracking-tight leading-tight">Update Handicap</h3>
+                <p class="text-slate-500 text-sm mt-1 font-medium">For <span id="edit-hdcp-name" class="font-bold text-slate-800">...</span></p>
+            </div>
+            <form onsubmit="submitHdcpUpdate(event)" class="space-y-4 text-left">
+                <div>
+                    <input type="text" id="edit-hdcp-input" required placeholder="e.g. 10.5 or +2" class="w-full p-4 bg-slate-50 border-2 border-slate-100 focus:border-sky-500 rounded-2xl text-center font-black text-xl outline-none text-slate-800 transition-colors">
+                </div>
+                <div class="flex items-center justify-center gap-3 mt-2">
+                    <input type="checkbox" id="edit-hdcp-nc" onchange="toggleEditNoHandicap(this.checked)" class="w-5 h-5 accent-sky-500 rounded cursor-pointer">
+                    <label for="edit-hdcp-nc" class="text-xs font-black text-slate-500 uppercase tracking-widest cursor-pointer leading-tight pt-1">No Handicap (NC)</label>
+                </div>
+                <div class="space-y-3 mt-6">
+                    <button type="submit" id="edit-hdcp-btn" class="w-full bg-sky-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-sky-700 transition-all shadow-lg active-scale">
+                        Save Update
+                    </button>
+                    <button type="button" onclick="closeHdcpModal()" class="w-full bg-slate-100 text-slate-500 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-200 transition-all active-scale">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Admin Screen -->
     <div id="screen-admin" class="fixed inset-0 z-[300] bg-slate-900 overflow-y-auto hidden">
         <div class="max-w-md mx-auto bg-white min-h-screen p-6">
@@ -441,6 +471,80 @@
             } catch(e) { showToast("Error updating database", true); }
         }
 
+        // Handicap Edit Functions
+        let editingHdcpPlayerId = null;
+
+        window.openHdcpModal = function(id, currentVal, name) {
+            editingHdcpPlayerId = id;
+            document.getElementById('edit-hdcp-name').innerText = name;
+            const input = document.getElementById('edit-hdcp-input');
+            const checkbox = document.getElementById('edit-hdcp-nc');
+            
+            if (currentVal === 'NC') {
+                checkbox.checked = true;
+                input.value = 'NC';
+                input.disabled = true;
+                input.classList.add('opacity-50');
+            } else {
+                checkbox.checked = false;
+                input.value = currentVal;
+                input.disabled = false;
+                input.classList.remove('opacity-50');
+            }
+
+            const modal = document.getElementById('modal-hdcp');
+            modal.classList.remove('hidden');
+            setTimeout(() => document.getElementById('modal-hdcp-content').classList.replace('scale-0', 'scale-100'), 10);
+        };
+
+        window.closeHdcpModal = function() {
+            const modal = document.getElementById('modal-hdcp');
+            const content = document.getElementById('modal-hdcp-content');
+            content.classList.replace('scale-100', 'scale-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+
+        window.toggleEditNoHandicap = function(checked) {
+            const input = document.getElementById('edit-hdcp-input');
+            if (checked) {
+                input.value = 'NC'; input.disabled = true; input.classList.add('opacity-50');
+            } else {
+                input.value = ''; input.disabled = false; input.classList.remove('opacity-50');
+            }
+        };
+
+        window.submitHdcpUpdate = async function(e) {
+            e.preventDefault();
+            if (!editingHdcpPlayerId) return;
+
+            const hdcp = document.getElementById('edit-hdcp-input').value.trim();
+            const noHdcp = document.getElementById('edit-hdcp-nc').checked;
+
+            if (!hdcp && !noHdcp) return showToast("Enter a handicap or check NC.", true);
+
+            const btn = document.getElementById('edit-hdcp-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin inline"></i> Updating...`; 
+            btn.disabled = true; lucide.createIcons();
+
+            try {
+                await setDoc(doc(db, 'artifacts', activeAppId, 'public', 'data', 'players', editingHdcpPlayerId), {
+                    handicap: noHdcp ? 'NC' : hdcp,
+                    noHandicap: noHdcp,
+                    lastUpdated: new Date().toISOString()
+                }, { merge: true });
+                
+                showToast("Handicap updated successfully!");
+                closeHdcpModal();
+            } catch(err) {
+                console.error(err);
+                showToast(`Update Failed: ${err.message}`, true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
+
         // Auto-Save Engine
         let autoSaveTimeout = null;
 
@@ -470,6 +574,8 @@
                             const hdcpDisplay = playerDoc ? (playerDoc.noHandicap ? 'NC' : playerDoc.handicap) : 'TBD';
                             const paidBadge = (playerDoc && playerDoc.hasPaid) ? `<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 shrink-0" title="Paid"></i>` : '';
                             
+                            const clickAction = playerDoc ? `onclick="openHdcpModal('${playerDoc.id}', '${playerDoc.noHandicap ? 'NC' : playerDoc.handicap}', '${playerDoc.name.replace(/'/g, "\\'")}')"` : `onclick="showToast('Player not registered yet.', true)"`;
+                            
                             return `<div class="flex flex-row items-center justify-between border-b border-slate-100/50 py-2.5 last:border-0 last:pb-0">
                                 <div class="flex items-center gap-3 overflow-hidden">
                                     <span class="w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-400 shrink-0">${i+1}</span>
@@ -477,7 +583,7 @@
                                 </div>
                                 <div class="flex items-center gap-2 shrink-0 ml-2">
                                     ${paidBadge}
-                                    <span class="text-[9px] font-black ${playerDoc && playerDoc.noHandicap ? 'text-rose-500 bg-rose-50 border-rose-100' : 'text-slate-500 bg-white border-slate-200'} uppercase tracking-widest px-2 py-1.5 rounded-lg border shadow-sm flex items-center gap-1 w-16 justify-center" title="Handicap">${hdcpDisplay}</span>
+                                    <span ${clickAction} class="cursor-pointer hover:scale-105 hover:bg-slate-100 hover:shadow-md transition-all text-[9px] font-black ${playerDoc && playerDoc.noHandicap ? 'text-rose-500 bg-rose-50 border-rose-100' : 'text-slate-500 bg-white border-slate-200'} uppercase tracking-widest px-2 py-1.5 rounded-lg border shadow-sm flex items-center gap-1 w-16 justify-center" title="Click to edit handicap">${hdcpDisplay}</span>
                                 </div>
                             </div>`;
                         }).join('')}
